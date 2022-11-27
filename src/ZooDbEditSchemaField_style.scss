@@ -1,0 +1,79 @@
+
+//@import 'codemirror/theme/base16-light.css';
+
+
+
+.ZooDbEditSchemaField {
+    margin: 1rem 0px 1rem 0px;
+
+    .ZooDbEditSchemaField_fieldname {
+        font-weight: bold;
+    }
+
+    .ZooDbEditSchemaField_field_description {
+        //font-size: $small-font-size;
+        font-style: italic;
+    }
+    .ZooDbEditSchemaField_field_expected {
+        //font-size: $small-font-size;
+        font-style: italic;
+        color: rgba(darkgreen,0.8);
+    }
+
+
+    .array_item {
+        > button {
+            float: left;
+            //margin-left: -3em;
+        }
+
+        > .ZooDbEditSchemaField {
+            margin-left: 4rem;
+        }
+    }
+
+
+
+    >div.input, >input, >textarea, >select {
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        box-sizing: border-box;
+        padding: 5px;
+    }
+    input, textarea, select {
+        padding: 5px;
+        font-size: 1.05rem;
+    }
+    >div.input > input[type=number] {
+        width: 50%;
+        min-width: 50%;
+        box-sizing: border-box;
+    }
+
+
+    .checkbox-input {
+        padding: 5px;
+        display: inline-block;
+        margin-right: 2em;
+        >input {
+            display: inline-block;
+            margin-left: 0.8em;
+            transform: scale(1.25);
+        }
+    }
+    .hasvalue-n {
+        opacity: 0.6;
+    }
+    button.clear-to-undefined {
+        display: inline-block;
+    }
+
+    .cm-content {
+        font-size: 14px;
+        font-family: "Menlo", "DejaVu Sans Mono", "Droid Mono", monospace;
+    }
+}
+
+
+
