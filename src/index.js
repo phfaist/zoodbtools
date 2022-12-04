@@ -2,11 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 //import YAML from 'yaml'; // yaml fails to parse multi-line strings !?
-import jsyaml from 'js-yaml';
+//import jsyaml from 'js-yaml';
 
-import ZooDbEditObjectApp from "./ZooDbEditObjectApp.jsx";
+import { ZooDbEditObjectComponent } from "./ZooDbEditObjectComponent.jsx";
+import { DocumentObjectUpdaterModel } from "./DocumentObjectUpdaterModel.js";
 
-export ZooDbEditObjectApp;
+export { ZooDbEditObjectComponent, DocumentObjectUpdaterModel };
 
 
 

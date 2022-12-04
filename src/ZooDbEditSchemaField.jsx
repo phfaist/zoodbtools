@@ -1,10 +1,12 @@
+import debug_mod from 'debug';
+const debug = debug_mod('zoodbeditobject.ZooDbEditSchemaField');
+
 import React from 'react';
 
 import CodeMirror from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/stream-parser';
-import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { EditorView } from '@codemirror/view';
-
+import { StreamLanguage } from '@codemirror/language';
+import { stex } from '@codemirror/legacy-modes/mode/stex';
 
 import './ZooDbEditSchemaField_style.scss';
 
@@ -45,7 +47,11 @@ class ZooDbEditSchemaFieldObjectType extends React.Component
                         fieldname={prop_key} 
                         schema={prop_schema}
                         value={prop_value}
-                        onChange={ (val) => this.field_changed(prop_key, val) }  />
+                        onChange={ (val) => this.field_changed(prop_key, val) }
+                        document_object_updater_model={
+                            this.props.document_object_updater_model
+                        }
+                    />
                 );
             });
         return props_components_list;
@@ -77,7 +83,7 @@ class ZooDbEditSchemaFieldObjectType extends React.Component
 
         }
 
-        console.log("Property changed, new value is ", val, " --> ", new_value);
+        debug("Property changed, new value is ", val, " --> ", new_value);
 
         this.props.onChange( new_value );
     }
@@ -105,6 +111,7 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
                 return (
                     <div key={index}
                          className="array_item">
+                        <button key={'+'} onClick={ ()=>this.itemNewInsert(index) }>+</button>
                         <button key={'-'} onClick={ ()=>this.itemRemove(index) }>-</button>
                         <button key={'^'} onClick={ ()=>this.itemMoveUp(index) }>↑</button>
                         <button key={'v'} onClick={ ()=>this.itemMoveDown(index) }>↓</button>
@@ -114,7 +121,11 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
                             fieldname={'Item ' + (1+index)} 
                             schema={schema_items}
                             value={item_value}
-                            onChange={(val) => this.itemChanged(index, val) } />
+                            onChange={(val) => this.itemChanged(index, val) }
+                            document_object_updater_model={
+                                this.props.document_object_updater_model
+                            }
+                        />
                     </div>);
             }
         );
@@ -141,18 +152,32 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
         if (new_array === this.props.value) {
             return;
         }
-        console.log("New array is ", new_array);
+        debug("New array is ", new_array);
         this.props.onChange( new_array );
     }
 
-    itemRemove(idx)
+    itemNewInsert(index)
+    {
+        let new_array = this.props.document_object_updater_model.array_new_item(
+            this.props.value,
+            null,
+            index
+        );
+        if (new_array === this.props.value) {
+            return;
+        }
+        debug("New array is ", new_array);
+        this.props.onChange( new_array );
+    }
+
+    itemRemove(index)
     {
         const value = (this.props.value || []);
 
-        if (idx < 0 || idx >= value.length) { return; }
+        if (index < 0 || index >= value.length) { return; }
 
         const confirm_result = window.confirm(
-            "Remove item #" + (1+idx) + ": " + JSON.stringify(value[idx]) + " ?"
+            "Remove item #" + (1+index) + ": " + JSON.stringify(value[index]) + " ?"
         );
         if (!confirm_result) {
             return;
@@ -160,7 +185,7 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
 
         let new_array = this.props.document_object_updater_model.array_delete_item(
             this.props.value,
-            idx
+            index
         );
         if (new_array === this.props.value) {
             return new_array
@@ -169,7 +194,7 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
         this.props.onChange( new_array );
     }
 
-    itemMoveUp(idx)
+    itemMoveUp(index)
     {
         const new_array = this.props.document_object_updater_model.array_move_item(
             this.props.value,
@@ -181,7 +206,7 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
         this.props.onChange( new_array );
     }
 
-    itemMoveDown(idx)
+    itemMoveDown(index)
     {
         const new_array = this.props.document_object_updater_model.array_move_item(
             this.props.value,
@@ -274,7 +299,8 @@ class ZooDbEditSchemaFieldScalarType extends React.Component
                 <ZooDbEditSChemaFieldScalarNonstringType
                     value={this.props.value}
                     schema={schema}
-                    onChange={(newvalue) => this.props.onChange(newvalue)} />
+                    onChange={(newvalue) => this.props.onChange(newvalue)}
+                />
             )
         }
 
@@ -308,7 +334,7 @@ class ZooDbEditSchemaFieldScalarType extends React.Component
                 return (
                     <textarea
                         onChange={(event) => this.props.onChange(event.target.value)}
-                        >{value}</textarea>
+                        value={value} />
                 );
             }
         }
@@ -322,10 +348,20 @@ class ZooDbEditSchemaFieldScalarType extends React.Component
                 placeholder="<<< Type text here. >>>"
                 value={value}
                 min-height={height}
-                extensions={[StreamLanguage.define(stex), EditorView.lineWrapping]}
                 onChange={(value, viewUpdate) => {
                     this.props.onChange(value);
                 }}
+                basicSetup={{
+                    lineNumbers: true,
+                    dropCursor: true,
+                    foldGutter: false,
+                    bracketMatching: true,
+                    closeBrackets: false,
+                }}
+                extensions={ [
+                    StreamLanguage.define(stex),
+                    EditorView.lineWrapping,
+                ] }
             />
         );
     }
@@ -383,7 +419,7 @@ class ZooDbEditFieldDescription extends React.Component
 
 
 
-export default class ZooDbEditSchemaFieldextends React.Component
+export default class ZooDbEditSchemaField extends React.Component
 {
     shouldComponentUpdate(newProps, newState)
     {
@@ -398,7 +434,7 @@ export default class ZooDbEditSchemaFieldextends React.Component
 
         const document_object_updater_model = this.props.document_object_updater_model;
 
-        console.log("render()! fieldname = ", fieldname);
+        debug("render()! fieldname = ", fieldname);
 
         let edit_component = null;
 
