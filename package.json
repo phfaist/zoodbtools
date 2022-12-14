@@ -2,24 +2,49 @@
   "name": "zoodbeditobject",
   "version": "0.1.0",
   "description": "Simple React app to edit objects in a ZooDB database",
-  "main": "src/index.js",
   "repository": "https://github.com/phfaist/zoodbeditobject",
   "author": "Philippe Faist",
   "license": "MIT",
   "dependencies": {
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/legacy-modes": "^6.0.0",
+    "@phfaist/zoodb": "link:../zoodb",
+    "@uiw/react-codemirror": "^4.15.1",
     "jsonschema": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@uiw/react-codemirror": "^4.15.1",
-    "@codemirror/legacy-modes": "^6.0.0",
-    "@codemirror/language": "^6.0.0"
+    "react-tabs": "^6.0.0"
   },
   "devDependencies": {
-    "@parcel/transformer-sass": "2.7.0",
-    "parcel": "2.7.0",
-    "process": "^0.11.10"
+    "@kkirbatski/parcel-resolver-require-resolve": "^1.0.4",
+    "@mischnic/parcel-resolver-root": "^0.4.2",
+    "@parcel/optimizer-data-url": "^2.8.1",
+    "@parcel/transformer-inline-string": "^2.8.1",
+    "@parcel/transformer-sass": "^2.8.1",
+    "assert": "^2.0.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "buffer-browserify": "^0.2.5",
+    "eczoo-js": "link:../../2021-qec-zoo/playground-11ty/eczoo-js",
+    "events": "^3.3.0",
+    "https-browserify": "^1.0.0",
+    "parcel": "^2.8.1",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "querystring-es3": "^0.2.1",
+    "sirv-cli": "^2.0.2",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "util": "^0.12.5"
+  },
+  "scripts": {
+    "dev": "parcel --no-optimize --no-cache playground/mytest.html",
+    "build": "parcel build --no-optimize --no-cache playground/mytest.html",
+    "serve": "sirv dist/"
   },
   "alias": {
-    "process": false
+    "process": false,
+    "stream": "./node_modules/stream-browserify/index.js",
+    "path": "./node_modules/path-browserify/index.js"
   }
 }

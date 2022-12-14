@@ -1,7 +1,7 @@
 import debug_module from 'debug';
 const debug = debug_module('zoodbeditobject.ZooDbEditObjectComponent');
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import ZooDbEditSchemaField from './ZooDbEditSchemaField.jsx';
 
@@ -9,53 +9,46 @@ import ZooDbEditSchemaField from './ZooDbEditSchemaField.jsx';
 
 
 
-
-export class ZooDbEditObjectComponent extends React.Component
+export function ZooDbEditObjectComponent(props)
 {
-    constructor(props)
-    {
-        const {
-            object_title,
-            object_schema,
-            object_data,
-            document_object_updater_model
-        } = props;
-        debug('Loading ZooDbEditObjectComponent for', object_title);
-        super(props);
-        this.state = {
-            object_title,
-            object_data,
-        };
-    }
+    const {
+        object_type,
+        object_schema,
+        object_data,
+        document_object_updater_model,
+        onChange,
+    } = props;
+    
+    debug('Loading ZooDbEditObjectComponent');
 
-    render()
-    {
-        return (
-            <div key={'mainpane'} className="ZooDbEditObjectComponent_root">
-                <ZooDbEditSchemaField
-                    fieldname={''}
-                    schema={this.props.object_schema}
-                    value={this.state.object_data}
-                    onChange={(new_object_data) => this.set_new_object_data(new_object_data)}
-                    document_object_updater_model={
-                        this.props.document_object_updater_model
-                    }
-                />
-            </div>
-        );
-    }
+    const [state_object_data, set_state_object_data] = useState(object_data);
 
-    set_new_object_data(new_object_data)
-    {
+    const set_new_object_data = (new_object_data) => {
         debug("Object data changed = ", new_object_data);
-        this.setState({ object_data: new_object_data });
+        if (onChange != null) { // null or undefined
+            onChange(new_object_data);
+            debug('component parent onChange called.')
+        }
+        set_state_object_data(new_object_data);
     }
 
-    clear() {
-        this.setState({
-            object_title: '',
-            object_data: {},
-        });
-    }
+    // const clear = () => {
+    //     this.setState({
+    //         object_data: {},
+    //     });
+    // }
 
-};
+    return (
+        <div key={'mainpane'} className="ZooDbEditObjectComponent_root">
+            <ZooDbEditSchemaField
+                fieldname={''}
+                schema={object_schema}
+                value={state_object_data}
+                onChange={set_new_object_data}
+                document_object_updater_model={
+                    document_object_updater_model
+                }
+            />
+        </div>
+    );
+}

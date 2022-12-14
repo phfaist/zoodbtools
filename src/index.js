@@ -7,7 +7,13 @@ import ReactDOM from "react-dom";
 import { ZooDbEditObjectComponent } from "./ZooDbEditObjectComponent.jsx";
 import { DocumentObjectUpdaterModel } from "./DocumentObjectUpdaterModel.js";
 
-export { ZooDbEditObjectComponent, DocumentObjectUpdaterModel };
+import { ZooDbEditObjectWithPreviewComponent } from "./ZooDbEditObjectWithPreviewComponent.jsx";
+
+export {
+    ZooDbEditObjectComponent,
+    ZooDbEditObjectWithPreviewComponent,
+    DocumentObjectUpdaterModel
+};
 
 
 

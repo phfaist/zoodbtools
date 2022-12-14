@@ -111,10 +111,16 @@ class ZooDbEditSchemaFieldArrayType extends React.Component
                 return (
                     <div key={index}
                          className="array_item">
-                        <button key={'+'} onClick={ ()=>this.itemNewInsert(index) }>+</button>
-                        <button key={'-'} onClick={ ()=>this.itemRemove(index) }>-</button>
-                        <button key={'^'} onClick={ ()=>this.itemMoveUp(index) }>↑</button>
-                        <button key={'v'} onClick={ ()=>this.itemMoveDown(index) }>↓</button>
+                        <div className="array_item_button_group">
+                            <button key={'+'}
+                                    onClick={ ()=>this.itemNewInsert(index) }>+</button>
+                            <button key={'-'}
+                                    onClick={ ()=>this.itemRemove(index) }>-</button>
+                            <button key={'^'}
+                                    onClick={ ()=>this.itemMoveUp(index) }>↑</button>
+                            <button key={'v'}
+                                    onClick={ ()=>this.itemMoveDown(index) }>↓</button>
+                        </div>
                         <ZooDbEditSchemaField
                             key={'fld'}
                             skip_description={true}
