@@ -10,6 +10,7 @@ import './ZooDbEditObjectWithPreviewComponent_style.scss';
 
 import { ZooDbEditObjectComponent } from './ZooDbEditObjectComponent.jsx';
 
+import { $$kw, repr } from '@phfaist/zoodb/zoollm';
 import { LLMSimpleContentCompiler } from '@phfaist/zoodb/dbprocessor/llmsimplecontent';
 
 
@@ -67,8 +68,13 @@ export function ZooDbEditObjectWithPreviewComponent(props)
            
         } catch (err) {
             console.error('Error rendering object: ', err, ' Object was: ', object_data);
+            const errstr = (
+                (err && err.hasOwnProperty('__class__'))
+                 ? repr(err)
+                 : err.toString()
+                );
             return (
-                <pre>{'Error rendering object: ' + err.toString()}</pre>
+                <pre>{'Error rendering object: ' + errstr}</pre>
             );
 
         }
