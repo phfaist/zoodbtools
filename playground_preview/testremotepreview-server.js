@@ -73,7 +73,7 @@ async function runServer()
     const listeners = getEventListeners(server, 'request');
     server.removeAllListeners('request');
     server.on('request', (request, res) => {
-        console.log('REQUEST!', {request, res});
+        // console.log('REQUEST!', {request, res});
         if (request.method !== 'GET') {
             for (const defaultHandler of listeners) {
                 defaultHandler(request,res);
@@ -90,12 +90,12 @@ async function runServer()
         }
         const distFileResult = distFileContents[distFileName];
         if (distFileResult == null) {
-            res.writeHead(404);
+            res.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
             res.end(`File not found: ‘${url.pathname}’ (resolved to ‘${distFileName}’)`);
             return;
         }
         const mimeType = mime.lookup(distFileName) || 'application/octet-stream';
-        console.log(`Found mimeType for ‘${url.pathname}’ → ‘${mimeType}’`);
+        console.log(`Serving ‘${url.pathname}’ with mime type ‘${mimeType}’`);
         res.writeHead(200, { 'Content-Type': mimeType });
         res.end(distFileResult);
         return;

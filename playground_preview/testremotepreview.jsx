@@ -19,6 +19,8 @@ import { use_relations_populator } from '@phfaist/zoodb/std/use_relations_popula
 import { use_flm_environment } from '@phfaist/zoodb/std/use_flm_environment';
 import { use_flm_processor } from '@phfaist/zoodb/std/use_flm_processor';
 
+import { CitationSourceBase } from '@phfaist/zoodb/citationmanager/source/base';
+
 import { StandardZooDb } from '@phfaist/zoodb/std';
 import { StandardZooDbYamlDataLoader } from '@phfaist/zoodb/std/load_yamldb';
 
@@ -32,6 +34,63 @@ import loMerge from 'lodash/merge.js';
 
 
 const root_data_dir = '/Users/philippe/Research/projects/zoodb/zoodb-example'
+
+
+
+class CitationSourceStandInPlaceholder extends CitationSourceBase
+{
+    constructor(options)
+    {
+        options ||= {};
+
+        const override_options = {
+            source_name: `${options.title} (placeholder)`,
+            chunk_size: Infinity,
+            chunk_retrieve_delay_ms: 0,
+        };
+        const default_options = {
+            cite_prefix: options.cite_prefix,
+        };
+
+        super(
+            override_options,
+            options,
+            default_options,
+        );
+    }
+
+    async run_retrieve_chunk(id_list)
+    {
+        for (let cite_key of id_list) {
+            cite_key = cite_key.trim();
+            const cite_key_encoded = encodeURIComponent(cite_key);
+
+            let flm_text = `${this.options.title} \\verbcode{${cite_key}}`
+
+            let test_url = this.options.test_url(this.cite_prefix, cite_key);
+            if (test_url) {
+                flm_text += ` ... \\href{${test_url}}{TEST→}`;
+            }
+
+            // clean up the data a bit, we don't need the full list of references (!)
+            let csljsondata = {
+                _ready_formatted: {
+                    flm: flm_text,
+                }
+            };
+
+            this.citation_manager.store_citation(
+                this.cite_prefix, cite_key, csljsondata, this.cache_store_options
+            );
+        }
+    }
+    
+}
+
+
+
+// ...............................................
+
 
 
 
@@ -77,8 +136,16 @@ export class MyZooDb extends StandardZooDb
                         // deactive arxiv & doi, since their public APIs seem to
                         // have strict CORS settings meaning we can't call them
                         // from other web apps
-                        doi: false,
-                        arxiv: false,
+                        doi: new CitationSourceStandInPlaceholder({
+                            title: "DOI citation",
+                            cite_prefix: 'doi',
+                            test_url: (_, cite_key) => `https://doi.org/${cite_key}`,
+                        }),
+                        arxiv: new CitationSourceStandInPlaceholder({
+                            title: "arXiv [& DOI?] citation",
+                            cite_prefix: 'arxiv',
+                            test_url: (_, cite_key) => `https://arxiv.org/abs/${cite_key}`,
+                        }),
                     },
                 },
                 
@@ -197,7 +264,12 @@ export function installFlmContentStyles()
     );
     const styElement = document.createElement('style');
     styElement.setAttribute('type', 'text/css');
-    styElement.innerText = styinfo.css_content;
+    styElement.innerText = `
+/* FLM - global */
+${ styinfo.css_global }
+/* FLM - content */
+${ styinfo.css_content }
+`;
     document.head.appendChild(styElement);
 }
 

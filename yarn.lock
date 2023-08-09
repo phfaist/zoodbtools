@@ -1277,7 +1277,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=dd04c6&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=623d72&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1298,7 +1298,7 @@ __metadata:
     stream-parser: ^0.3.1
     tippy.js: ^6.3.7
     url: ^0.11.0
-  checksum: 14f267073fc9012f251998941303a88b9ada9f68afe390aeb5db7d8f86fa5c5b1d115cbe17205b0d6f3cff5848cfdf969248ef8ac517e22f6c23a6d537013003
+  checksum: 57cf5ae5acd79753308a28dc441d676a957a183650f7746f6d8b81487637bff0f93cfbdf438f0dff691e40dac77dd56a13e0f41a25d49a875dace3f9bdcc50ef
   languageName: node
   linkType: hard
 
