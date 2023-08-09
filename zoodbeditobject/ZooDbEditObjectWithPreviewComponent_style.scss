@@ -33,3 +33,12 @@
     grid-column: 1;
     overflow: auto;
 }
+
+
+.flm-error-message {
+    color: rgb(127,0,0);
+    font-weight: bold;
+    display: block;
+    padding: 10px;
+    background-color: rgba(255,0,0,0.1);
+}

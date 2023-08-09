@@ -10,8 +10,8 @@ import './ZooDbEditObjectWithPreviewComponent_style.scss';
 
 import { ZooDbEditObjectComponent } from './ZooDbEditObjectComponent.jsx';
 
-import { $$kw, repr } from '@phfaist/zoodb/zoollm';
-import { LLMSimpleContentCompiler } from '@phfaist/zoodb/dbprocessor/llmsimplecontent';
+import { $$kw, repr } from '@phfaist/zoodb/zooflm';
+import { FLMSimpleContentCompiler } from '@phfaist/zoodb/dbprocessor/flmsimplecontent';
 
 
 export function ZooDbEditObjectWithPreviewComponent(props)
@@ -21,7 +21,7 @@ export function ZooDbEditObjectWithPreviewComponent(props)
         object_type,
         object_schema,
         object_data,
-        zoo_llm_environment,
+        zoo_flm_environment,
         ...edit_component_props
     } = props;
 
@@ -46,12 +46,12 @@ export function ZooDbEditObjectWithPreviewComponent(props)
 
             const object = JSON.parse(JSON.stringify(object_data));
 
-            const llm_compiler = new LLMSimpleContentCompiler({
-                llm_environment: zoo_llm_environment,
-                llm_error_policy: 'continue',
+            const flm_compiler = new FLMSimpleContentCompiler({
+                flm_environment: zoo_flm_environment,
+                flm_error_policy: 'continue',
             });
 
-            llm_compiler.compile_object(
+            flm_compiler.compile_object(
                 object_type,
                 null,
                 object,

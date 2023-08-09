@@ -4,26 +4,26 @@ const debug = debug_mod('mytest');
 import { createRoot } from 'react-dom/client';
 
 import { ZooDbEditObjectComponent, ZooDbEditObjectWithPreviewComponent,
-         DocumentObjectUpdaterModel } from '../src/index.js';
+         DocumentObjectUpdaterModel } from '../zoodbeditobject/index.js';
 
-import data from './dataecz.json';
-import llmrefs_data from './eczllmrefs.json';
+import eczoodata from './eczoodata.json';
+import eczoorefsdata from './eczoorefsdata.json';
 
-import * as zoollm from '@phfaist/zoodb/zoollm';
+import * as zooflm from '@phfaist/zoodb/zooflm';
 import { getfield, sqzhtml } from '@phfaist/zoodb/util';
 
 // -----------------------------------------------------------------------------
 
-export function render_code_page(code, {zoo_llm_environment, doc_metadata})
+export function render_code_page(code, {zoo_flm_environment, doc_metadata})
 {
     //debug(`render_code_page(): Rendering code page for ‘${code.code_id}’ ...`);
     
     const render_doc_fn = (render_context) => {
 
         // debug(`Rendering code information. render_context =`, render_context,
-        //       `; zoo_llm_environment =`, zoo_llm_environment);
+        //       `; zoo_flm_environment =`, zoo_flm_environment);
 
-        const R = zoollm.make_render_shorthands({render_context});
+        const R = zooflm.make_render_shorthands({render_context});
         const { ne, rdr, ref } = R;
 
         let html = '';
@@ -169,8 +169,8 @@ export function render_code_page(code, {zoo_llm_environment, doc_metadata})
         return html;
     };
 
-    return zoollm.make_and_render_document({
-        zoo_llm_environment,
+    return zooflm.make_and_render_document({
+        zoo_flm_environment,
         render_doc_fn,
         doc_metadata,
         render_endnotes: {
@@ -190,32 +190,32 @@ window.addEventListener('load', () => {
     debug('window load');
 
     const container = window.document.getElementById('AppContainer');
-    const code_schema = data.db.schemas.code;
-    const code_data = data.db.objects.code.css;
+    const code_schema = eczoodata.db.schemas.code;
+    const code_data = eczoodata.db.objects.code.stab_4_2_2; // .css; // .stabilizer;
 
     debug('ZooDbEditObjectComponent = ', ZooDbEditObjectComponent);
 
     const document_object_updater_model = new DocumentObjectUpdaterModel();
 
-    const zoo_llm_environment = new zoollm.ZooLLMEnvironment({
+    const zoo_flm_environment = new zooflm.ZooFLMEnvironment({
         citations_provider: {
-            get_citation_full_text_llm(cite_prefix, cite_key, resource_info) {
+            get_citation_full_text_flm(cite_prefix, cite_key, resource_info) {
                 return `\\begin{verbatimtext}${cite_prefix}:${cite_key}\\end{verbatimtext}`;
             }
         },
     });
 
     // fix ref resolvers ->
-    zoo_llm_environment.ref_resolver.load_database(llmrefs_data);
+    zoo_flm_environment.ref_resolver.load_database(eczoorefsdata.refs);
     
     // add a "fallback" ref resolver for invalid refs.
-    zoo_llm_environment.feature_refs.add_external_ref_resolver(
+    zoo_flm_environment.feature_refs.add_external_ref_resolver(
         {
             get_ref(ref_type, ref_label, resource_info, render_context) {
                 debug(`Default ref_resolver called for invalid reference `
                       + `‘${ref_type}:${ref_label}’`);
                 return RefInstance(
-                    // ref_type, ref_label, formatted_ref_llm_text, target_href
+                    // ref_type, ref_label, formatted_ref_flm_text, target_href
                     ref_type, ref_label,
                     '<??>', null
                 );
@@ -223,20 +223,20 @@ window.addEventListener('load', () => {
         }
     );
 
-    debug(`Initialized LLM environment; external_ref_resolvers = `,
-          zoo_llm_environment.feature_refs.external_ref_resolvers);
-    debug(`Initialized LLM environment; ref_resolver = `,
-          zoo_llm_environment.ref_resolver);
+    debug(`Initialized FLM environment; external_ref_resolvers = `,
+          zoo_flm_environment.feature_refs.external_ref_resolvers);
+    debug(`Initialized FLM environment; ref_resolver = `,
+          zoo_flm_environment.ref_resolver);
 
     const render_code_fn = (code_object, code_data, code_schema) => {
         debug('resolving ref to user:VictorVAlbert -> ',
-              zoo_llm_environment.ref_resolver.get_ref('user', 'VictorVAlbert')
+              zoo_flm_environment.ref_resolver.get_ref('user', 'VictorVAlbert')
              );
 
         debug(`The feature object's external ref resolvers are`,
-              zoo_llm_environment.feature_refs.external_ref_resolvers);
+              zoo_flm_environment.feature_refs.external_ref_resolvers);
 
-        return render_code_page(code_object, {zoo_llm_environment, doc_metadata:{}});
+        return render_code_page(code_object, {zoo_flm_environment, doc_metadata:{}});
     };
 
 
@@ -251,7 +251,7 @@ window.addEventListener('load', () => {
             object_data={code_data}
             render_object={render_code_fn}
             document_object_updater_model={document_object_updater_model}
-            zoo_llm_environment={zoo_llm_environment}
+            zoo_flm_environment={zoo_flm_environment}
         />
     );
 

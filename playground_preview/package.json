@@ -1,0 +1,32 @@
+{
+  "name": "zoodbtools_playground_preview",
+  "version": "0.0.1",
+  "packageManager": "yarn@3.3.0",
+  "private": true,
+  "dependencies": {
+    "@phfaist/zoodb": "file:../../zoodb",
+    "browserfs": "^1.4.3",
+    "debug": "^4.3.4",
+    "fs-remote": "^0.1.9",
+    "glob": "^10.3.3",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
+    "parcel": "^2.9.3",
+    "parcel-optimizer-nohtmlsuffix": "https://github.com/phfaist/parcel-optimizer-nohtmlsuffix",
+    "sirv-cli": "^2.0.2"
+  },
+  "peerDependencies": {
+    "@phfaist/zoodb": "*"
+  },
+  "scripts": {
+    "dev-build": "rm -rf dist && parcel build --no-optimize --no-cache testpreview.html && yarn private-dist-add-use-strict",
+    "dev-build-remotepreview": "rm -rf dist && parcel build --no-optimize --no-cache testremotepreview.html && yarn private-dist-add-use-strict",
+    "run-remotepreview": "DEBUG=\"*\" yarn node ./testremotepreview-server.js",
+    "_build_remotepreview_app": "rm -rf dist && parcel build --no-optimize --no-cache testremotepreview.html\" && yarn private-dist-add-use-strict",
+    "serve": "sirv dist/",
+    "private-dist-add-use-strict": "bash -c 'for i in dist/*.js; do if [ -e \"$i\" ]; then mv \"$i\" \"$i\".COPY; echo \"\\\"use strict\\\";\" >\"$i\"; cat \"$i\".COPY >>\"$i\"; rm \"$i\".COPY; echo \"added “use strict” to $i\"; fi; done'"
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
+  }
+}
