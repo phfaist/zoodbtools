@@ -98,10 +98,14 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     if (selectedObjectType && selectedObjectId && zoodb.objects[selectedObjectType]) object = zoodb.objects[selectedObjectType][selectedObjectId];
     if (object) {
         previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
-        $55cc9c1ed9922b9a$var$debug(`Rendered HTML -> `, previewHtml);
+        $55cc9c1ed9922b9a$var$debug(`Rendered HTML -> `, {
+            previewHtml: previewHtml
+        });
     } else if (incompleteSelectionRenderHtml != null) {
         previewHtml = incompleteSelectionRenderHtml(zoodb, selectedObjectType, selectedObjectId);
-        $55cc9c1ed9922b9a$var$debug(`Rendered HTML for incomplete selection -> `, previewHtml);
+        $55cc9c1ed9922b9a$var$debug(`Rendered HTML for incomplete selection -> `, {
+            previewHtml: previewHtml
+        });
     } else previewHtml = `Please select an object to preview using the selection boxes above.`;
     let commandButtonsComponentContents = [];
     if (CommandButtonsComponent != null) {
@@ -123,6 +127,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
         children: [
             /*#__PURE__*/ (0, $iKhfe$jsx)((0, $iKhfe$reactselect), {
                 className: "zoodb-preview-select-objecttype",
+                classNamePrefix: "zoodb-preview-react-select",
                 value: {
                     value: selectedObjectType,
                     label: selectedObjectType
@@ -132,6 +137,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
             }),
             /*#__PURE__*/ (0, $iKhfe$jsx)((0, $iKhfe$reactselect), {
                 className: "zoodb-preview-select-objectid",
+                classNamePrefix: "zoodb-preview-react-select",
                 value: {
                     value: selectedObjectId,
                     label: selectedObjectId

@@ -125,12 +125,12 @@ export function ZooDbPreviewComponent(props)
     }
     if (object) {
         previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
-        debug(`Rendered HTML -> `, previewHtml);
+        debug(`Rendered HTML -> `, { previewHtml });
     } else if (incompleteSelectionRenderHtml != null) {
         previewHtml = incompleteSelectionRenderHtml(
             zoodb, selectedObjectType, selectedObjectId
         );
-        debug(`Rendered HTML for incomplete selection -> `, previewHtml);
+        debug(`Rendered HTML for incomplete selection -> `, { previewHtml });
     } else {
         previewHtml = `Please select an object to preview using the selection boxes above.`
     }
@@ -150,12 +150,14 @@ export function ZooDbPreviewComponent(props)
         <div className="ZooDbPreviewComponent">
             <Select
                 className="zoodb-preview-select-objecttype"
+                classNamePrefix="zoodb-preview-react-select"
                 value={{value: selectedObjectType, label: selectedObjectType}}
                 onChange={(newValue) => setSelectedObjectType(newValue.value)}
                 options={selectObjectTypeOptions}
             />
             <Select
                 className="zoodb-preview-select-objectid"
+                classNamePrefix="zoodb-preview-react-select"
                 value={{value: selectedObjectId, label: selectedObjectId }}
                 onChange={(newValue) => setSelectedObjectId(newValue.value)}
                 options={selectObjectIdOptions}
