@@ -13,7 +13,9 @@
     "mime-types": "^2.1.35",
     "parcel": "^2.9.3",
     "parcel-optimizer-nohtmlsuffix": "https://github.com/phfaist/parcel-optimizer-nohtmlsuffix",
-    "sirv-cli": "^2.0.2"
+    "sirv-cli": "^2.0.2",
+    "zoodbtools_preview": ">=0.0.1",
+    "zoodbtools_previewremote": ">=0.0.1"
   },
   "peerDependencies": {
     "@phfaist/zoodb": "*"

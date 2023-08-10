@@ -6,20 +6,22 @@ import path from 'path';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { ZooDbPreviewComponent } from '../zoodbpreview/index.js';
+import { CitationSourceApiPlaceholder } from 'zoodbtools_preview/citationapiplaceholder.js';
+import { ZooDbPreviewComponent } from 'zoodbtools_preview/index.js';
 
-import fsRemoteCreateClient from 'fs-remote/createClient';
+import { fsRemoteCreateClient } from 'zoodbtools_previewremote/useFsRemote.js';
+import {
+    installFlmContentStyles, simpleRenderObjectWithFlm
+} from 'zoodbtools_preview/renderFlm.js';
 
-import * as zooflm from '@phfaist/zoodb/zooflm';
-import { getfield, iter_object_fields_recursive, sqzhtml } from '@phfaist/zoodb/util';
+//import * as zooflm from '@phfaist/zoodb/zooflm';
+//import { getfield, iter_object_fields_recursive, sqzhtml } from '@phfaist/zoodb/util';
 
 // import * as BrowserFS from 'browserfs';
 
 import { use_relations_populator } from '@phfaist/zoodb/std/use_relations_populator';
 import { use_flm_environment } from '@phfaist/zoodb/std/use_flm_environment';
 import { use_flm_processor } from '@phfaist/zoodb/std/use_flm_processor';
-
-import { CitationSourceBase } from '@phfaist/zoodb/citationmanager/source/base';
 
 import { StandardZooDb } from '@phfaist/zoodb/std';
 import { StandardZooDbYamlDataLoader } from '@phfaist/zoodb/std/load_yamldb';
@@ -35,57 +37,6 @@ import loMerge from 'lodash/merge.js';
 
 const root_data_dir = '/Users/philippe/Research/projects/zoodb/zoodb-example'
 
-
-
-class CitationSourceStandInPlaceholder extends CitationSourceBase
-{
-    constructor(options)
-    {
-        options ||= {};
-
-        const override_options = {
-            source_name: `${options.title} (placeholder)`,
-            chunk_size: Infinity,
-            chunk_retrieve_delay_ms: 0,
-        };
-        const default_options = {
-            cite_prefix: options.cite_prefix,
-        };
-
-        super(
-            override_options,
-            options,
-            default_options,
-        );
-    }
-
-    async run_retrieve_chunk(id_list)
-    {
-        for (let cite_key of id_list) {
-            cite_key = cite_key.trim();
-            const cite_key_encoded = encodeURIComponent(cite_key);
-
-            let flm_text = `${this.options.title} \\verbcode{${cite_key}}`
-
-            let test_url = this.options.test_url(this.cite_prefix, cite_key);
-            if (test_url) {
-                flm_text += ` ... \\href{${test_url}}{TEST→}`;
-            }
-
-            // clean up the data a bit, we don't need the full list of references (!)
-            let csljsondata = {
-                _ready_formatted: {
-                    flm: flm_text,
-                }
-            };
-
-            this.citation_manager.store_citation(
-                this.cite_prefix, cite_key, csljsondata, this.cache_store_options
-            );
-        }
-    }
-    
-}
 
 
 
@@ -133,15 +84,15 @@ export class MyZooDb extends StandardZooDb
                     default_user_agent: null,
                     
                     sources: {
-                        // deactive arxiv & doi, since their public APIs seem to
-                        // have strict CORS settings meaning we can't call them
-                        // from other web apps
-                        doi: new CitationSourceStandInPlaceholder({
+                        // latch custom placeholder onto arxiv & doi, since
+                        // their public APIs seem to have strict CORS settings
+                        // meaning we can't call them from other web apps
+                        doi: new CitationSourceApiPlaceholder({
                             title: "DOI citation",
                             cite_prefix: 'doi',
                             test_url: (_, cite_key) => `https://doi.org/${cite_key}`,
                         }),
-                        arxiv: new CitationSourceStandInPlaceholder({
+                        arxiv: new CitationSourceApiPlaceholder({
                             title: "arXiv [& DOI?] citation",
                             cite_prefix: 'arxiv',
                             test_url: (_, cite_key) => `https://arxiv.org/abs/${cite_key}`,
@@ -253,120 +204,9 @@ export class MyZooDbYamlDataLoader extends StandardZooDbYamlDataLoader
 
 
 
-// -----------------------------------------------------------------------------
-
-
-
-export function installFlmContentStyles()
-{
-    const styinfo = zooflm.html_fragmentrenderer_get_style_information(
-        new zooflm.ZooHtmlFragmentRenderer()
-    );
-    const styElement = document.createElement('style');
-    styElement.setAttribute('type', 'text/css');
-    styElement.innerText = `
-/* FLM - global */
-${ styinfo.css_global }
-/* FLM - content */
-${ styinfo.css_content }
-`;
-    document.head.appendChild(styElement);
-}
-
-
-
 
 
 // -----------------------------------------------------------------------------
-
-
-
-function renderObject(zoodb, object_type, object_id, object)
-{
-    const zoo_flm_environment = zoodb.zoo_flm_environment;
-
-    const schema = zoodb.schemas[object_type];
-
-    debug(`renderObject(): ${object_type} ${object_id}`);
-
-    const render_doc_fn = (render_context) => {
-        const R = zooflm.make_render_shorthands({render_context});
-        const { ne, rdr, ref } = R;
-
-        let html = `<div class="object_render">`;
-
-        html += sqzhtml`
-<h1>Object: ${object_type} <code>${object_id}</code></h1>
-`;
-
-        for (const {fieldname, fieldvalue, fieldschema}
-             of iter_object_fields_recursive(object, schema)) {
-            if (fieldvalue == null) {
-                continue;
-            }
-            let rendered = null;
-            try {
-                rendered = rdr(fieldvalue);
-            } catch (err) {
-                let errstr = null;
-                if (!err) { errstr = '??'; }
-                else if (typeof err === 'object' && '__class__' in err && 'msg' in err) {
-                    errstr = err.msg; //zooflm.repr(err);
-                } 
-                else if (typeof err === 'object' && 'toString' in err) {
-                    errstr = ''+err;
-                }
-                else {
-                    errstr = '???';
-                }
-                rendered = `<span class="error">(Render error: ${errstr})</span>`;
-            }
-            html += sqzhtml`
-<h2 class="fieldname">${fieldname}</h2>
-<div class="fieldcontent">
-${ rendered }
-</div>
-`;
-        }
-
-        html += `
-
-<RENDER_ENDNOTES/>
-
-`;
-        html += `</div>`;
-        return html;
-    };
-
-    return zooflm.make_and_render_document({
-        zoo_flm_environment,
-        render_doc_fn,
-        //doc_metadata,
-        render_endnotes: true,
-        flm_error_policy: 'continue',
-    });
-}
-
-
-
-// -----------------------------------------------------------------------------
-
-
-const promisify = (fn) => {
-    return function() {
-        var args = arguments;
-        return new Promise( (resolve, reject) => {
-            fn(...args,
-               (err, ...results) => {
-                   if (err != null) {
-                       reject(err)
-                   } else {
-                       resolve(...results);
-                   }
-               });
-        } );
-    };
-};
 
 
 window.addEventListener('load', async () => {
@@ -398,12 +238,7 @@ window.addEventListener('load', async () => {
 
     // connect to remote FS
 
-    const fs = fsRemoteCreateClient("http://localhost:3010");
-    
-    fs.promises = {};
-    for (const method of ['access','appendFile','chmod','chown','close', 'copyFile','exists','fchmod','fchown','fdatasync','fstat','fsync','ftruncate','futimes','lchmod','lchown','link','lstat','mkdir','mkdtemp','open','read','readFile','readdir','readlink','realpath','rename','rmdir','stat','symlink','truncate','unlink','utimes','write','writeFile',]) {
-        fs.promises[method] = promisify(fs[method]);
-    }
+    const fs = fsRemoteCreateClient();
 
 
     // // DEBUG fs-remote
@@ -456,11 +291,11 @@ window.addEventListener('load', async () => {
     //
     // Render the app
     //
-    const react_root = createRoot(container);
-    react_root.render(
+    const reactRoot = createRoot(container);
+    reactRoot.render(
         <ZooDbPreviewComponent
             zoodb={zoodb}
-            renderObject={renderObject}
+            renderObject={simpleRenderObjectWithFlm}
             getMathJax={() => window.MathJax}
             objectType={'person'}
             objectId={'bob'}

@@ -5,6 +5,7 @@
   "workspaces": [
     "zoodbeditobject",
     "zoodbpreview",
+    "zoodbpreviewremote",
     "playground_preview"
   ],
   "devDependencies": {
