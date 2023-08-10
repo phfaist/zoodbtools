@@ -1,1 +1,1 @@
-export { ZooDbPreviewComponent, installFlmContentStyles } from './ZooDbPreviewComponent.jsx';
+export { ZooDbPreviewComponent } from './ZooDbPreviewComponent.jsx';
