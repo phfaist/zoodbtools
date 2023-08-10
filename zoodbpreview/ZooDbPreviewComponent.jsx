@@ -23,7 +23,8 @@ export function ZooDbPreviewComponent(props)
         objectId,
         getMathJax,
         installFlmObjectLinkCallback,
-        CommandButtonsComponent
+        incompleteSelectionRenderHtml,
+        CommandButtonsComponent,
     } = props;
 
     objectType ||= "";
@@ -125,6 +126,13 @@ export function ZooDbPreviewComponent(props)
     if (object) {
         previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
         debug(`Rendered HTML -> `, previewHtml);
+    } else if (incompleteSelectionRenderHtml != null) {
+        previewHtml = incompleteSelectionRenderHtml(
+            zoodb, selectedObjectType, selectedObjectId
+        );
+        debug(`Rendered HTML for incomplete selection -> `, previewHtml);
+    } else {
+        previewHtml = `Please select an object to preview using the selection boxes above.`
     }
 
     let commandButtonsComponentContents = []
