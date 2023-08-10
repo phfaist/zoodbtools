@@ -3,16 +3,16 @@ const debug = debug_mod('zoodb-testremotepreview');
 
 import path from 'path';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { CitationSourceApiPlaceholder } from 'zoodbtools_preview/citationapiplaceholder.js';
-import { ZooDbPreviewComponent } from 'zoodbtools_preview/index.js';
+import { CitationSourceApiPlaceholder } from 'zoodbtools_preview';
+import { ZooDbPreviewComponent } from 'zoodbtools_preview';
 
 import { fsRemoteCreateClient } from 'zoodbtools_previewremote/useFsRemote.js';
 import {
     installFlmContentStyles, simpleRenderObjectWithFlm
-} from 'zoodbtools_preview/renderFlm.js';
+} from 'zoodbtools_preview';
 
 //import * as zooflm from '@phfaist/zoodb/zooflm';
 //import { getfield, iter_object_fields_recursive, sqzhtml } from '@phfaist/zoodb/util';
@@ -200,8 +200,29 @@ export class MyZooDbYamlDataLoader extends StandardZooDbYamlDataLoader
 
 
 
+function ReloadCommandButtonsComponent(props)
+{
+    const { zoodb, doRefreshPreview } = props;
 
+    const btnDomRef = useRef(null);
 
+    const doReloadZoo = async () => {
+        btnDomRef.current.disabled = true;
+        try {
+            await zoodb.load()
+            debug(`Finished reloading the zoo.`);
+        } finally {
+            btnDomRef.current.disabled = false;
+            doRefreshPreview();
+        }
+    };
+
+    return (
+        <div className="CommandButtonsComponent">
+            <button onClick={doReloadZoo} ref={btnDomRef}>RELOAD ZOO</button>
+        </div>
+    );
+};
 
 
 
@@ -305,6 +326,7 @@ window.addEventListener('load', async () => {
             objectType={'person'}
             objectId={'bob'}
             installFlmObjectLinkCallback={[window,'appFlmCallbackObjectLink']}
+            CommandButtonsComponent={ReloadCommandButtonsComponent}
         />
     );
             // objectType={'code'}

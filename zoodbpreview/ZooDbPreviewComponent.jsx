@@ -23,6 +23,7 @@ export function ZooDbPreviewComponent(props)
         objectId,
         getMathJax,
         installFlmObjectLinkCallback,
+        CommandButtonsComponent
     } = props;
 
     objectType ||= "";
@@ -36,6 +37,8 @@ export function ZooDbPreviewComponent(props)
             selectedObjectId: objectId,
         }
     );
+
+    const [ previewingZooVersion, setPreviewingZooVersion ] = useState(0);
 
     const renderContentDomNodeRef = useRef(null);
 
@@ -61,7 +64,7 @@ export function ZooDbPreviewComponent(props)
 
             return;
         },
-        [ selectedObjectTypeAndId ]
+        [ selectedObjectTypeAndId, previewingZooVersion ]
     );
 
     // useful callbacks --
@@ -124,6 +127,17 @@ export function ZooDbPreviewComponent(props)
         debug(`Rendered HTML -> `, previewHtml);
     }
 
+    let commandButtonsComponentContents = []
+    if (CommandButtonsComponent != null) {
+        const commandButtonsProps = {
+            zoodb, selectedObjectTypeAndId, setSelectedObjectTypeAndId, object,
+            doRefreshPreview: () => setPreviewingZooVersion(previewingZooVersion + 1)
+        };
+        commandButtonsComponentContents = [(
+            <CommandButtonsComponent {...commandButtonsProps} />
+        )];
+    }
+
     return (
         <div className="ZooDbPreviewComponent">
             <Select
@@ -143,6 +157,7 @@ export function ZooDbPreviewComponent(props)
                  dangerouslySetInnerHTML={ {__html: previewHtml} }
             >
             </div>
+            {commandButtonsComponentContents}
         </div>
     );
 }
