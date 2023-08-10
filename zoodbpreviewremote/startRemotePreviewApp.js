@@ -39,6 +39,7 @@ const _default_options = {
 
     // Once the server started
     startUserBrowser: true,
+
 };
 
 
@@ -53,7 +54,7 @@ export class PreviewAppServer
             options ?? {}
         );
 
-        this.distFileContents = {};
+        this.distFileContents = Object.assign({}, this.options.serveFiles);
         this.distAliases = {};
     }
 
@@ -150,13 +151,19 @@ export class PreviewAppServer
                 distFileName = this.distAliases[distFileName];
             }
 
-            const contents = this.distFileContents[distFileName];
-
+            let contents = this.distFileContents[distFileName];
+            
             if (contents == null) {
                 res.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
                 res.end(`File not found: ‘${url.pathname}’ (resolved to ‘${distFileName}’)`);
                 return;
             }
+
+            if (typeof contents === 'object' && !(contents instanceof Buffer)) {
+                // it's a JSON object that we should stringify first
+                contents = JSON.stringify(contents);
+            }
+
             const mimeType = mime.lookup(distFileName) || 'application/octet-stream';
             console.log(`Serving ‘${url.pathname}’ with mime type ‘${mimeType}’`);
             res.writeHead(200, { 'Content-Type': mimeType });

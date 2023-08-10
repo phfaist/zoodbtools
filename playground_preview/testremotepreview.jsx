@@ -218,6 +218,11 @@ window.addEventListener('load', async () => {
     const container = window.document.getElementById('AppContainer');
 
     // create our ZooDb instance for our previews
+
+    // get custom data that the preview server might want to communicate to us
+    const serverData = await (await fetch("/appData.json")).json();
+
+    debug(`Got serverData = `, serverData);
     
     //BrowserFS.install(window);
 

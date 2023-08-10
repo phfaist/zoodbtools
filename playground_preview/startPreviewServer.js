@@ -13,6 +13,12 @@ async function go()
         runParcel: true,
 
         serveFilesDir: '../../zoodb-example/',
+
+        serveFiles: {
+            'appData.json': {
+                'hello': 'world',
+            },
+        },
     };
 
     // completely clean the dist/ dir to avoid files accumulating there
