@@ -5,6 +5,7 @@
   "dependencies": {
     "debug": "^4.3.4",
     "fs-remote": "^0.1.9",
+    "glob": "^10.3.3",
     "mime-types": "^2.1.35",
     "open": "^9.1.0"
   },
