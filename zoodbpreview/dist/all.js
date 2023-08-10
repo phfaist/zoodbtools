@@ -16,7 +16,7 @@ import {sqzhtml as $iKhfe$sqzhtml} from "@phfaist/zoodb/util/sqzhtml";
 
 const $55cc9c1ed9922b9a$var$debug = (0, $iKhfe$debug)("zoodbtoolspreview.ZooDbPreviewComponent");
 function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
-    let { zoodb: zoodb, renderObject: renderObject, objectType: objectType, objectId: objectId, getMathJax: getMathJax, installFlmObjectLinkCallback: installFlmObjectLinkCallback, CommandButtonsComponent: CommandButtonsComponent } = props;
+    let { zoodb: zoodb, renderObject: renderObject, objectType: objectType, objectId: objectId, getMathJax: getMathJax, installFlmObjectLinkCallback: installFlmObjectLinkCallback, incompleteSelectionRenderHtml: incompleteSelectionRenderHtml, CommandButtonsComponent: CommandButtonsComponent } = props;
     objectType ||= "";
     objectId ||= "";
     // React states and effects --
@@ -99,7 +99,10 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     if (object) {
         previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
         $55cc9c1ed9922b9a$var$debug(`Rendered HTML -> `, previewHtml);
-    }
+    } else if (incompleteSelectionRenderHtml != null) {
+        previewHtml = incompleteSelectionRenderHtml(zoodb, selectedObjectType, selectedObjectId);
+        $55cc9c1ed9922b9a$var$debug(`Rendered HTML for incomplete selection -> `, previewHtml);
+    } else previewHtml = `Please select an object to preview using the selection boxes above.`;
     let commandButtonsComponentContents = [];
     if (CommandButtonsComponent != null) {
         const commandButtonsProps = {
