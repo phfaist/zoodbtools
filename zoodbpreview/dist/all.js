@@ -2,7 +2,7 @@ import "./all.css";
 import $iKhfe$debug from "debug";
 import {useState as $iKhfe$useState, useRef as $iKhfe$useRef, useEffect as $iKhfe$useEffect} from "react";
 import $iKhfe$reactselect from "react-select";
-import {jsxs as $iKhfe$jsxs, jsx as $iKhfe$jsx} from "react/jsx-runtime";
+import {jsx as $iKhfe$jsx, jsxs as $iKhfe$jsxs} from "react/jsx-runtime";
 import {CitationSourceBase as $iKhfe$CitationSourceBase} from "@phfaist/zoodb/citationmanager/source/base";
 import {html_fragmentrenderer_get_style_information as $iKhfe$html_fragmentrenderer_get_style_information, ZooHtmlFragmentRenderer as $iKhfe$ZooHtmlFragmentRenderer, make_render_shorthands as $iKhfe$make_render_shorthands, make_and_render_document as $iKhfe$make_and_render_document} from "@phfaist/zoodb/zooflm";
 import "@phfaist/zoodb/util/getfield";
@@ -16,7 +16,7 @@ import {sqzhtml as $iKhfe$sqzhtml} from "@phfaist/zoodb/util/sqzhtml";
 
 const $55cc9c1ed9922b9a$var$debug = (0, $iKhfe$debug)("zoodbtoolspreview.ZooDbPreviewComponent");
 function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
-    let { zoodb: zoodb, renderObject: renderObject, objectType: objectType, objectId: objectId, getMathJax: getMathJax, installFlmObjectLinkCallback: installFlmObjectLinkCallback } = props;
+    let { zoodb: zoodb, renderObject: renderObject, objectType: objectType, objectId: objectId, getMathJax: getMathJax, installFlmObjectLinkCallback: installFlmObjectLinkCallback, CommandButtonsComponent: CommandButtonsComponent } = props;
     objectType ||= "";
     objectId ||= "";
     // React states and effects --
@@ -24,6 +24,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
         selectedObjectType: objectType,
         selectedObjectId: objectId
     });
+    const [previewingZooVersion, setPreviewingZooVersion] = (0, $iKhfe$useState)(0);
     const renderContentDomNodeRef = (0, $iKhfe$useRef)(null);
     (0, $iKhfe$useEffect)(()=>{
         const domNode = renderContentDomNodeRef.current;
@@ -43,7 +44,8 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
         ]);
         return;
     }, [
-        selectedObjectTypeAndId
+        selectedObjectTypeAndId,
+        previewingZooVersion
     ]);
     // useful callbacks --
     const { selectedObjectType: selectedObjectType, selectedObjectId: selectedObjectId } = selectedObjectTypeAndId;
@@ -98,6 +100,21 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
         previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
         $55cc9c1ed9922b9a$var$debug(`Rendered HTML -> `, previewHtml);
     }
+    let commandButtonsComponentContents = [];
+    if (CommandButtonsComponent != null) {
+        const commandButtonsProps = {
+            zoodb: zoodb,
+            selectedObjectTypeAndId: selectedObjectTypeAndId,
+            setSelectedObjectTypeAndId: setSelectedObjectTypeAndId,
+            object: object,
+            doRefreshPreview: ()=>setPreviewingZooVersion(previewingZooVersion + 1)
+        };
+        commandButtonsComponentContents = [
+            /*#__PURE__*/ (0, $iKhfe$jsx)(CommandButtonsComponent, {
+                ...commandButtonsProps
+            })
+        ];
+    }
     return /*#__PURE__*/ (0, $iKhfe$jsxs)("div", {
         className: "ZooDbPreviewComponent",
         children: [
@@ -125,7 +142,8 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
                 dangerouslySetInnerHTML: {
                     __html: previewHtml
                 }
-            })
+            }),
+            commandButtonsComponentContents
         ]
     });
 }
