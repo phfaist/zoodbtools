@@ -222,7 +222,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
     else if (zooDbAccessState.status === "reloading") previewMessages = /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$Fragment), {
         children: /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
             className: "info small-caption",
-            children: "⏳ Reloading, please wait ... ⏳"
+            children: "⏳ Reloading, please wait ..."
         })
     });
     else if (zooDbAccessState.status === "load-error") {
