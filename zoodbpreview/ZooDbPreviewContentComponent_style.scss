@@ -1,19 +1,25 @@
 .zoodb-preview-content
 {
-    min-height: 20px;
-
     padding: 0px;
 
     > article {
-        padding: 25px;
+        padding: 25px 25px 25px 25px;
         margin: 0px auto;
         background-color: rgba(128,128,128,0.3);
+
+        min-height: 67%;
     }
 
     .visual-highlight {
         background-color: rgba(127,127,0,0.5) !important;
         box-shadow: rgba(127,127,0,0.5) 0px 0px 10px;
         transition: background-color 0.4s;
+    }
+
+    .zoodb-preview-content-please-select-object {
+        text-align: center;
+        font-style: italic;
+        opacity: 0.8;
     }
 }
 

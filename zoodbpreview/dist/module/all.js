@@ -176,8 +176,10 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
             };
         }
         let pleaseSelectHtmlMessage = `
+<article class="zoodb-preview-content-please-select-object">
 <p>Please use the selection boxes above to select a zoo entry to display.</p>
-`.trim();
+</article>
+`;
         $e81314a651474654$var$debug(`Selection is probably incomplete, rendered user message`);
         return {
             htmlContent: pleaseSelectHtmlMessage

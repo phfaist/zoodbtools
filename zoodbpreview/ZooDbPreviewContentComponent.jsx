@@ -232,8 +232,10 @@ export function ZooDbPreviewContentComponent(props)
         }
 
         let pleaseSelectHtmlMessage = `
+<article class="zoodb-preview-content-please-select-object">
 <p>Please use the selection boxes above to select a zoo entry to display.</p>
-`.trim();
+</article>
+`;
         
         debug(`Selection is probably incomplete, rendered user message`);
 
