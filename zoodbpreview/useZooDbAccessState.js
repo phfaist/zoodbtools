@@ -20,7 +20,10 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, triggerInitialLoad
         // to the user; since we expect reloads to be much quicker than initial
         // loads)
         status: 'empty',
-        // the current ZooDb instance object, if status == 'loaded'
+        // the current ZooDb instance object, if status == 'loaded' (or also if
+        // we are in the status 'load-error' after a failed reload; in which
+        // case the zoodb stays in the internal state but is not made public.
+        // It's to make reloads faster.)
         zoodb: null,
         // the error that occurred, if status == 'load-error'
         error: null,
@@ -58,18 +61,19 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, triggerInitialLoad
                 setZooDbLoadState(state => ({
                     status: 'load-error',
                     error,
-                    zoodb: null,
+                    zoodb: state.zoodb, // keep zoodb pointer to speed up reloads
                     _promise: null,
                     loadVersion: state.loadVersion,
                 }));
             }
         );
-        // NOTE: Do NOT set the zoodb field in the temporary 'loading' state,
-        // because we don't want preview components accessing the zoodb instance
-        // while it is being modified.  Therefore, we use "zoodb: null" here:
+        // NOTE: We keep the zoodb pointer because if there is an error during a
+        // reload, we still would like to keep the zoodb object reference so
+        // that we can still reload() the object.  We won't make this object
+        // public (in the public returned state) while we're loading.
         setZooDbLoadState(state => ({
             status: loadingStatus,
-            zoodb: null,
+            zoodb: state.zoodb,
             error: null,
             _promise: promise,
             loadVersion: state.loadVersion,
@@ -124,14 +128,23 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, triggerInitialLoad
 
     // debug(`useZooDbAccessState(); called useEffect(); about to return accessor object ...`);
 
+    // Do NOT set the zoodb field in the public returned state while we are in
+    // the temporary 'loading' state, because we don't want preview components
+    // accessing the zoodb instance while it is being modified.
+    let publicZooDb = null;
+    if (zooDbLoadState.status === 'loaded') {
+        publicZooDb = zooDbLoadState.zoodb;
+    }
+
     return {
         status: zooDbLoadState.status,
 
-        zoodb: zooDbLoadState.zoodb,
+        zoodb: publicZooDb,
 
         error: zooDbLoadState.error,
 
-        state: zooDbLoadState,
+        //state: zooDbLoadState,
+        loadVersion: zooDbLoadState.loadVersion,
 
         // can be used as a second argument in useEffect() etc. to flag for
         // effects etc. that need to fire when the ZooDb load state and/or

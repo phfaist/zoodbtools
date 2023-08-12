@@ -197,7 +197,7 @@ export function ZooDbPreviewContentBaseComponent(props)
 export function ZooDbPreviewContentComponent(props)
 {
     const {
-        zooDbAccessState,
+        zooDbAccess,
         objectType,
         objectId,
         renderObject,
@@ -208,7 +208,7 @@ export function ZooDbPreviewContentComponent(props)
 
     const renderContent = async ({ registerRenderPreviewCleanupCallback }) => {
 
-        const zoodb = zooDbAccessState.zoodb;
+        const zoodb = zooDbAccess.zoodb;
 
         if (zoodb == null) {
             // still loading (TODO; provide more information on loading state ...)
@@ -245,13 +245,13 @@ export function ZooDbPreviewContentComponent(props)
     const { renderContentDomNodeRef } = useLoadPreviewContentEffect({
         renderContent, getMathJax, onLinkClick,
         reloadPreviewDependencies:
-            [ objectType, objectId, zooDbAccessState.loadVersion ],
+            [ objectType, objectId, zooDbAccess.loadVersion ],
         resetScrollPreviewDependencies: [ objectType, objectId ],
     });
 
     let previewMessages = null;
 
-    if (zooDbAccessState.status === 'loading') {
+    if (zooDbAccess.status === 'loading') {
         previewMessages = (
             <>
                 <p className="info">⏳ Loading, please wait ...</p>
@@ -267,18 +267,18 @@ export function ZooDbPreviewContentComponent(props)
                 </div>
             </>
         );
-    } else if (zooDbAccessState.status === 'reloading') {
+    } else if (zooDbAccess.status === 'reloading') {
         previewMessages = (
             <>
                 <p className="info small-caption">⏳ Reloading, please wait ...</p>
             </>
         );
-    } else if (zooDbAccessState.status === 'load-error') {
+    } else if (zooDbAccess.status === 'load-error') {
         let errstr;
         try {
-            errstr = ''+zooDbAccessState.error;
+            errstr = ''+zooDbAccess.error;
         } catch (e) {
-            console.error(`Can't convert error to string: `, zooDbAccessState.error);
+            console.error(`Can't convert error to string: `, zooDbAccess.error);
             errstr = '(unknown error, cf. JavaScript console for details)'
         }
         previewMessages = (

@@ -165,6 +165,8 @@ export class MyZooDbYamlDataLoader extends StandardZooDbYamlDataLoader
     constructor()
     {
         super({
+            throw_reload_errors: true,
+
             //
             // specify objects & where to find them
             //
@@ -324,6 +326,7 @@ window.addEventListener('load', async () => {
 
 
     const reloadZooDb = async (zoodb) => {
+
         await zoodb.load();
 
         // test internal error during reload

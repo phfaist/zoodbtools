@@ -151,9 +151,9 @@ function $e81314a651474654$export$99ec54c3fb7c642d(props) {
     });
 }
 function $e81314a651474654$export$fd3ba78121e14bde(props) {
-    const { zooDbAccessState: zooDbAccessState, objectType: objectType, objectId: objectId, renderObject: renderObject, getMathJax: getMathJax, onLinkClick: onLinkClick } = props;
+    const { zooDbAccess: zooDbAccess, objectType: objectType, objectId: objectId, renderObject: renderObject, getMathJax: getMathJax, onLinkClick: onLinkClick } = props;
     const renderContent = async ({ registerRenderPreviewCleanupCallback: registerRenderPreviewCleanupCallback })=>{
-        const zoodb = zooDbAccessState.zoodb;
+        const zoodb = zooDbAccess.zoodb;
         if (zoodb == null) {
             // still loading (TODO; provide more information on loading state ...)
             $e81314a651474654$var$debug(`zoodb is null, the zoo is probably loading. Won't update preview for now.`);
@@ -193,7 +193,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
         reloadPreviewDependencies: [
             objectType,
             objectId,
-            zooDbAccessState.loadVersion
+            zooDbAccess.loadVersion
         ],
         resetScrollPreviewDependencies: [
             objectType,
@@ -201,7 +201,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
         ]
     });
     let previewMessages = null;
-    if (zooDbAccessState.status === "loading") previewMessages = /*#__PURE__*/ (0, $b6z2V$jsxs)((0, $b6z2V$Fragment), {
+    if (zooDbAccess.status === "loading") previewMessages = /*#__PURE__*/ (0, $b6z2V$jsxs)((0, $b6z2V$Fragment), {
         children: [
             /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
                 className: "info",
@@ -222,18 +222,18 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
             })
         ]
     });
-    else if (zooDbAccessState.status === "reloading") previewMessages = /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$Fragment), {
+    else if (zooDbAccess.status === "reloading") previewMessages = /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$Fragment), {
         children: /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
             className: "info small-caption",
             children: "⏳ Reloading, please wait ..."
         })
     });
-    else if (zooDbAccessState.status === "load-error") {
+    else if (zooDbAccess.status === "load-error") {
         let errstr;
         try {
-            errstr = "" + zooDbAccessState.error;
+            errstr = "" + zooDbAccess.error;
         } catch (e) {
-            console.error(`Can't convert error to string: `, zooDbAccessState.error);
+            console.error(`Can't convert error to string: `, zooDbAccess.error);
             errstr = "(unknown error, cf. JavaScript console for details)";
         }
         previewMessages = /*#__PURE__*/ (0, $b6z2V$jsxs)("div", {
@@ -357,7 +357,10 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         // to the user; since we expect reloads to be much quicker than initial
         // loads)
         status: "empty",
-        // the current ZooDb instance object, if status == 'loaded'
+        // the current ZooDb instance object, if status == 'loaded' (or also if
+        // we are in the status 'load-error' after a failed reload; in which
+        // case the zoodb stays in the internal state but is not made public.
+        // It's to make reloads faster.)
         zoodb: null,
         // the error that occurred, if status == 'load-error'
         error: null,
@@ -391,17 +394,18 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             setZooDbLoadState((state)=>({
                     status: "load-error",
                     error: error,
-                    zoodb: null,
+                    zoodb: state.zoodb,
                     _promise: null,
                     loadVersion: state.loadVersion
                 }));
         });
-        // NOTE: Do NOT set the zoodb field in the temporary 'loading' state,
-        // because we don't want preview components accessing the zoodb instance
-        // while it is being modified.  Therefore, we use "zoodb: null" here:
+        // NOTE: We keep the zoodb pointer because if there is an error during a
+        // reload, we still would like to keep the zoodb object reference so
+        // that we can still reload() the object.  We won't make this object
+        // public (in the public returned state) while we're loading.
         setZooDbLoadState((state)=>({
                 status: loadingStatus,
-                zoodb: null,
+                zoodb: state.zoodb,
                 error: null,
                 _promise: promise,
                 loadVersion: state.loadVersion
@@ -442,11 +446,17 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         if (zooDbLoadState.status === "empty" && triggerInitialLoad) doLoad();
     });
     // debug(`useZooDbAccessState(); called useEffect(); about to return accessor object ...`);
+    // Do NOT set the zoodb field in the public returned state while we are in
+    // the temporary 'loading' state, because we don't want preview components
+    // accessing the zoodb instance while it is being modified.
+    let publicZooDb = null;
+    if (zooDbLoadState.status === "loaded") publicZooDb = zooDbLoadState.zoodb;
     return {
         status: zooDbLoadState.status,
-        zoodb: zooDbLoadState.zoodb,
+        zoodb: publicZooDb,
         error: zooDbLoadState.error,
-        state: zooDbLoadState,
+        //state: zooDbLoadState,
+        loadVersion: zooDbLoadState.loadVersion,
         // can be used as a second argument in useEffect() etc. to flag for
         // effects etc. that need to fire when the ZooDb load state and/or
         // contents change
@@ -554,7 +564,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
                     })
             }),
             /*#__PURE__*/ (0, $b6z2V$jsx)((0, $e81314a651474654$export$fd3ba78121e14bde), {
-                zooDbAccessState: zooDbAccess.state,
+                zooDbAccess: zooDbAccess,
                 objectType: objectType,
                 objectId: objectId,
                 renderObject: renderObject,

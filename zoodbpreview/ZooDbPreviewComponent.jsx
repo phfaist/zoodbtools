@@ -132,7 +132,7 @@ export function ZooDbPreviewComponent(props)
                 }
             />
             <ZooDbPreviewContentComponent
-                zooDbAccessState={zooDbAccess.state}
+                zooDbAccess={zooDbAccess}
                 objectType={objectType}
                 objectId={objectId}
                 renderObject={renderObject}
