@@ -54,6 +54,17 @@ export class MyZooDb extends StandardZooDb
         const fs = config.fs;
         const fsPromises = config.fs.promises ?? config.fs;
 
+        let searchableCompiledCache = {};
+        try {
+            searchableCompiledCache = JSON.parse(fs.readFileSync(
+                path.join(config.fs_data_dir, '..', 'website', '_zoodb_citations_cache',
+                          'cache_compiled_citations.json')
+            ));
+            console.log(`Loaded citation cache`, searchableCompiledCache);
+        } catch (err) {
+            console.warn(`Couldn't load cache, will proceed without`, err);
+        }
+
         super(loMerge({
 
             // fs,
@@ -83,22 +94,29 @@ export class MyZooDb extends StandardZooDb
                         'citations_info/bib_preset.yml',
                     ],
                     default_user_agent: null,
-                    
+
                     sources: {
                         // latch custom placeholder onto arxiv & doi, since
                         // their public APIs seem to have strict CORS settings
                         // meaning we can't call them from other web apps
                         doi: new CitationSourceApiPlaceholder({
-                            title: "DOI citation",
+                            title: (doi) => `[DOI \\verbcode{${doi}}; citation text will appear on production zoo website]`,
                             cite_prefix: 'doi',
                             test_url: (_, cite_key) => `https://doi.org/${cite_key}`,
+                            search_in_compiled_cache: searchableCompiledCache,
                         }),
                         arxiv: new CitationSourceApiPlaceholder({
-                            title: "arXiv [& DOI?] citation",
+                            title: (arxivid) => `[arXiv:${arxivid}; citation text will appear on production zoo website (& via DOI if published)]`,
                             cite_prefix: 'arxiv',
                             test_url: (_, cite_key) => `https://arxiv.org/abs/${cite_key}`,
+                            search_in_compiled_cache: searchableCompiledCache,
                         }),
                     },
+
+                    cache_dir: '_zoodb_live_preview_dummy_cache_shouldnt_be_created',
+                    cache_dir_create: false,
+
+                    skip_save_cache: true,
                 },
                 
                 allow_unresolved_references: true,
