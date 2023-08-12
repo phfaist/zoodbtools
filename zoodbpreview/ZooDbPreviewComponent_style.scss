@@ -39,6 +39,10 @@
         grid-column-end: 3;
     }
     .zoodb-preview-messages {
+
+        max-height: 80%;
+        overflow: auto;
+
         grid-row-start: 3;
         grid-row-end: 4;
         grid-column-start: 1;
