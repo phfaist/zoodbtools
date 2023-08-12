@@ -49,4 +49,12 @@
         font-size: 1rem;
         font-weight: normal;
     }
+    pre {
+        font-size: 1rem;
+        line-height: 1.05em;
+    }
+    pre.small-caption {
+        font-size: 0.8rem;
+        line-height: 1.05em;
+    }
 }

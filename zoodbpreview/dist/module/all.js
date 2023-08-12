@@ -242,7 +242,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
                 /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
                     children: "Error while loading the zoo!"
                 }),
-                /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
+                /*#__PURE__*/ (0, $b6z2V$jsx)("pre", {
                     className: "small-caption",
                     children: errstr
                 }),

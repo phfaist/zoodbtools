@@ -284,7 +284,7 @@ export function ZooDbPreviewContentComponent(props)
         previewMessages = (
             <div className="error">
                 <p>Error while loading the zoo!</p>
-                <p className="small-caption">{errstr}</p>
+                <pre className="small-caption">{errstr}</pre>
                 <p className="small-caption">
                     Consult your browser's JavaScript console for additional
                     information that might be helpful for debugging this issue.
