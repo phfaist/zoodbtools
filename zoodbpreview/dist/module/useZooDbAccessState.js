@@ -8,21 +8,24 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
     triggerInitialLoad ??= true;
     // debug(`useZooDbAccessState()`);
     const [zooDbLoadState, setZooDbLoadState] = (0, $babXZ$useState)({
-        // status = 'empty', 'loading', 'loaded', or 'load-error' (no
-        // 'reloading', we use status 'loading' also if the zoo is re-loading)
+        // status = 'empty', 'loading', 'loaded', 'reloading', or 'load-error'
+        // (the separate 'reloading' status is used so we can tailor the message
+        // to the user; since we expect reloads to be much quicker than initial
+        // loads)
         status: "empty",
         // the current ZooDb instance object, if status == 'loaded'
         zoodb: null,
         // the error that occurred, if status == 'load-error'
         error: null,
-        // the promise that will resolve to a ZooDb instance object, if status == 'loading'
+        // the promise that will resolve to a ZooDb instance object, if status
+        // == 'loading' or status == 'reloading'
         _promise: null,
         // a flag that we increase to ensure the state changes after the zoo is
         // reloaded.
         loadVersion: 0
     });
     $cdbe94ce1f253c89$var$debug(`useZooDbAccessState() - `, zooDbLoadState);
-    const doSetupLoadStateFromPromise = (promise)=>{
+    const doSetupLoadStateFromPromise = (promise, loadingStatus)=>{
         promise.then(//
         // On promise accepted = zoo successfully loaded
         //
@@ -53,7 +56,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         // because we don't want preview components accessing the zoodb instance
         // while it is being modified.  Therefore, we use "zoodb: null" here:
         setZooDbLoadState((state)=>({
-                status: "loading",
+                status: loadingStatus,
                 zoodb: null,
                 error: null,
                 _promise: promise,
@@ -67,7 +70,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             return;
         }
         let promise = loadZooDb();
-        doSetupLoadStateFromPromise(promise);
+        doSetupLoadStateFromPromise(promise, "loading");
     };
     const doReload = ()=>{
         $cdbe94ce1f253c89$var$debug(`Called doReload()`);
@@ -76,7 +79,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             return;
         }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
-        doSetupLoadStateFromPromise(promise);
+        doSetupLoadStateFromPromise(promise, "reloading");
     };
     (0, $babXZ$useEffect)(()=>{
         // debug(`useEffect function called`);

@@ -265,6 +265,12 @@ export function ZooDbPreviewContentComponent(props)
                 </div>
             </>
         );
+    } else if (zooDbAccessState.status === 'reloading') {
+        previewMessages = (
+            <>
+                <p className="info small-caption">⏳ Reloading, please wait ... ⏳</p>
+            </>
+        );
     } else if (zooDbAccessState.status === 'load-error') {
         let errstr;
         try {
