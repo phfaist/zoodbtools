@@ -135,7 +135,6 @@
 }
 
 .ZooDbPreviewComponent .zoodb-preview-messages {
-  max-height: 80%;
   grid-area: 3 / 1 / 4 / 3;
   overflow: auto;
 }
