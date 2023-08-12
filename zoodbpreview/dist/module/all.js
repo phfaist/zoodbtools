@@ -153,12 +153,16 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
     const { zooDbAccessState: zooDbAccessState, objectType: objectType, objectId: objectId, renderObject: renderObject, getMathJax: getMathJax, onLinkClick: onLinkClick } = props;
     const renderContent = async ({ registerRenderPreviewCleanupCallback: registerRenderPreviewCleanupCallback })=>{
         const zoodb = zooDbAccessState.zoodb;
-        if (zoodb == null) // still loading (TODO; provide more information on loading state ...)
-        return {
-            htmlContent: null
-        };
-        if (objectType && objectId && zoodb.objects[objectType]) {
-            let object = zoodb.objects[objectType][objectId];
+        if (zoodb == null) {
+            // still loading (TODO; provide more information on loading state ...)
+            $e81314a651474654$var$debug(`zoodb is null, the zoo is probably loading. Won't update preview for now.`);
+            return {
+                htmlContent: null
+            };
+        }
+        let object = null;
+        if (objectType && objectId && zoodb.objects[objectType]) object = zoodb.objects[objectType][objectId];
+        if (object != null) {
             const result = await renderObject({
                 zoodb: zoodb,
                 objectType: objectType,
@@ -166,6 +170,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
                 object: object,
                 registerRenderPreviewCleanupCallback: registerRenderPreviewCleanupCallback
             });
+            $e81314a651474654$var$debug(`Rendered object preview HTML → `, result);
             return {
                 htmlContent: result.htmlContent
             };
@@ -173,6 +178,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
         let pleaseSelectHtmlMessage = `
 <p>Please use the selection boxes above to select a zoo entry to display.</p>
 `.trim();
+        $e81314a651474654$var$debug(`Selection is probably incomplete, rendered user message`);
         return {
             htmlContent: pleaseSelectHtmlMessage
         };

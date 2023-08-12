@@ -212,21 +212,30 @@ export function ZooDbPreviewContentComponent(props)
 
         if (zoodb == null) {
             // still loading (TODO; provide more information on loading state ...)
+            debug(`zoodb is null, the zoo is probably loading. Won't update preview for now.`);
             return { htmlContent: null };
         }
 
+        let object = null;
         if (objectType && objectId && zoodb.objects[objectType]) {
-            let object = zoodb.objects[objectType][objectId];
+            object = zoodb.objects[objectType][objectId];
+        }
 
+        if (object != null) {
             const result =
                   await renderObject({zoodb, objectType, objectId, object,
                                       registerRenderPreviewCleanupCallback});
+
+            debug(`Rendered object preview HTML → `, result);
+
             return { htmlContent: result.htmlContent };
         }
 
         let pleaseSelectHtmlMessage = `
 <p>Please use the selection boxes above to select a zoo entry to display.</p>
 `.trim();
+        
+        debug(`Selection is probably incomplete, rendered user message`);
 
         return { htmlContent: pleaseSelectHtmlMessage };
     };
