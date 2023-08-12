@@ -202,7 +202,7 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
         children: [
             /*#__PURE__*/ (0, $b6z2V$jsx)("p", {
                 className: "info",
-                children: "⏳ Loading, please wait ... ⏳"
+                children: "⏳ Loading, please wait ..."
             }),
             /*#__PURE__*/ (0, $b6z2V$jsxs)("div", {
                 className: "info",
@@ -683,7 +683,7 @@ function $d30e7bcdac759df9$export$22ae542d2b30e3c1({ zoodb: zoodb, objectType: o
         });
         const { ne: ne, rdr: rdr, ref: ref } = R;
         render_context.registerRenderPreviewCleanupCallback = registerRenderPreviewCleanupCallback;
-        let html = `<div class="object_render">`;
+        let html = `<article class="object_render">`;
         html += (0, $b6z2V$sqzhtml)`
 <h1>Object: ${objectType} <code>${objectId}</code></h1>
 `;
@@ -712,7 +712,7 @@ ${rendered}
 <RENDER_ENDNOTES/>
 
 `;
-        html += `</div>`;
+        html += `</article>`;
         return html;
     };
     let htmlContent = $b6z2V$make_and_render_document({

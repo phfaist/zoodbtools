@@ -1,7 +1,12 @@
 .zoodb-preview-content {
   min-height: 20px;
+  padding: 0;
+}
+
+.zoodb-preview-content > article {
   background-color: #8080804d;
-  padding: 1em;
+  margin: 0 auto;
+  padding: 25px;
 }
 
 .zoodb-preview-content .visual-highlight {

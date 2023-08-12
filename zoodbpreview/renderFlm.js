@@ -140,7 +140,7 @@ export function simpleRenderObjectWithFlm({
         render_context.registerRenderPreviewCleanupCallback =
             registerRenderPreviewCleanupCallback;
 
-        let html = `<div class="object_render">`;
+        let html = `<article class="object_render">`;
 
         html += sqzhtml`
 <h1>Object: ${objectType} <code>${objectId}</code></h1>
@@ -181,7 +181,7 @@ ${ rendered }
 <RENDER_ENDNOTES/>
 
 `;
-        html += `</div>`;
+        html += `</article>`;
         return html;
     };
 

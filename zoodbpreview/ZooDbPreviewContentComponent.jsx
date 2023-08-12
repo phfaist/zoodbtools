@@ -252,7 +252,7 @@ export function ZooDbPreviewContentComponent(props)
     if (zooDbAccessState.status === 'loading') {
         previewMessages = (
             <>
-                <p className="info">⏳ Loading, please wait ... ⏳</p>
+                <p className="info">⏳ Loading, please wait ...</p>
                 <div className="info">
                     <p className="small-caption">
                         Please be patient while the zoo is loading.

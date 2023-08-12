@@ -92,7 +92,7 @@ function $d30e7bcdac759df9$export$22ae542d2b30e3c1({ zoodb: zoodb, objectType: o
         });
         const { ne: ne, rdr: rdr, ref: ref } = R;
         render_context.registerRenderPreviewCleanupCallback = registerRenderPreviewCleanupCallback;
-        let html = `<div class="object_render">`;
+        let html = `<article class="object_render">`;
         html += (0, $89tWE$sqzhtml)`
 <h1>Object: ${objectType} <code>${objectId}</code></h1>
 `;
@@ -121,7 +121,7 @@ ${rendered}
 <RENDER_ENDNOTES/>
 
 `;
-        html += `</div>`;
+        html += `</article>`;
         return html;
     };
     let htmlContent = $89tWE$make_and_render_document({
