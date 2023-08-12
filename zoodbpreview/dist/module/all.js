@@ -695,11 +695,7 @@ function $d30e7bcdac759df9$export$22ae542d2b30e3c1({ zoodb: zoodb, objectType: o
             if (fieldvalue == null) continue;
             let rendered = null;
             try {
-                // catch references to other DB objects
-                if (typeof fieldvalue === "object" && Object.hasOwn(fieldvalue, "_zoodb")) {
-                    const zoodbInfo = fieldvalue._zoodb;
-                    rendered = (0, $b6z2V$escapehtml)(`<Internal Zoo Reference to ‘${zoodbInfo.id}’>`);
-                } else rendered = rdr(fieldvalue);
+                rendered = rdr(fieldvalue);
             } catch (err) {
                 let errstr = null;
                 if (!err) errstr = "??";

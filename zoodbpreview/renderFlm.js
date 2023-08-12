@@ -155,13 +155,7 @@ export function simpleRenderObjectWithFlm({
             }
             let rendered = null;
             try {
-                // catch references to other DB objects
-                if (typeof fieldvalue === 'object' && Object.hasOwn(fieldvalue, '_zoodb')) {
-                    const zoodbInfo = fieldvalue._zoodb;
-                    rendered = html_escape(`<Internal Zoo Reference to ‘${zoodbInfo.id}’>`);
-                } else {
-                    rendered = rdr(fieldvalue);
-                }
+                rendered = rdr(fieldvalue);
             } catch (err) {
                 let errstr = null;
                 if (!err) { errstr = '??'; }
