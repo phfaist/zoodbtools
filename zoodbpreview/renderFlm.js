@@ -1,6 +1,8 @@
 import debugm from 'debug';
 const debug = debugm('zoodbpreview.renderFlm');
 
+import html_escape from 'escape-html';
+
 import * as zooflm from '@phfaist/zoodb/zooflm';
 import { getfield } from '@phfaist/zoodb/util/getfield';
 import { iter_object_fields_recursive } from '@phfaist/zoodb/util/objectinspector';
@@ -143,7 +145,7 @@ export function simpleRenderObjectWithFlm({
         let html = `<article class="object_render">`;
 
         html += sqzhtml`
-<h1>Object: ${objectType} <code>${objectId}</code></h1>
+<h1>Object: ${html_escape(objectType)} <code>${html_escape(objectId)}</code></h1>
 `;
 
         for (const {fieldname, fieldvalue, fieldschema}
@@ -153,7 +155,13 @@ export function simpleRenderObjectWithFlm({
             }
             let rendered = null;
             try {
-                rendered = rdr(fieldvalue);
+                // catch references to other DB objects
+                if (typeof fieldvalue === 'object' && Object.hasOwn(fieldvalue, '_zoodb')) {
+                    const zoodbInfo = fieldvalue._zoodb;
+                    rendered = html_escape(`<Internal Zoo Reference to ‘${zoodbInfo.id}’>`);
+                } else {
+                    rendered = rdr(fieldvalue);
+                }
             } catch (err) {
                 let errstr = null;
                 if (!err) { errstr = '??'; }
@@ -166,10 +174,10 @@ export function simpleRenderObjectWithFlm({
                 else {
                     errstr = '???';
                 }
-                rendered = `<span class="error">(Render error: ${errstr})</span>`;
+                rendered = `<span class="error">(Render error: ${html_escape(errstr)})</span>`;
             }
             html += sqzhtml`
-<h2 class="fieldname">${fieldname}</h2>
+<h2 class="fieldname">${html_escape(fieldname)}</h2>
 <div class="fieldcontent">
 ${ rendered }
 </div>

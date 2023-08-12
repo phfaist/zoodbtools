@@ -1277,7 +1277,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=19c9e8&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=0f8c54&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1298,7 +1298,7 @@ __metadata:
     stream-parser: ^0.3.1
     tippy.js: ^6.3.7
     url: ^0.11.0
-  checksum: 65815ba24e58c2f78ff9716863faaaf177f05cc20e8797b292e86f942c9a5c6e98c6dcbcf98a732d1ef6ee779b3c1cb06cbcdc7365395cdc3b5674f1e2b9c0d2
+  checksum: 38a37506be213ec501d181057bb7bc1e94038feeb6c1952ca5bdb0b56753f8fe0862f72e4e4de8d00c07f9514d2d40748e576c32c07f1986deeeb4e8d995d54d
   languageName: node
   linkType: hard
 
@@ -2680,7 +2680,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escape-html@npm:~1.0.3":
+"escape-html@npm:^1.0.3, escape-html@npm:~1.0.3":
   version: 1.0.3
   resolution: "escape-html@npm:1.0.3"
   checksum: 6213ca9ae00d0ab8bccb6d8d4e0a98e76237b2410302cf7df70aaa6591d509a2a37ce8998008cbecae8fc8ffaadf3fb0229535e6a145f3ce0b211d060decbb24
@@ -6019,6 +6019,7 @@ __metadata:
   resolution: "zoodbtools_preview@workspace:zoodbpreview"
   dependencies:
     debug: ^4.3.4
+    escape-html: ^1.0.3
     mime-types: ^2.1.35
     parcel: ^2.9.3
     react: ^18.2.0

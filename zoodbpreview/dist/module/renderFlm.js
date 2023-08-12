@@ -5,6 +5,8 @@ import {iter_object_fields_recursive as $89tWE$iter_object_fields_recursive} fro
 import {sqzhtml as $89tWE$sqzhtml} from "@phfaist/zoodb/util/sqzhtml";
 import {split_prefix_label as $89tWE$split_prefix_label} from "@phfaist/zoodb/util/prefixlabel";
 import $89tWE$mimetypes from "mime-types";
+import $89tWE$escapehtml from "escape-html";
+
 
 
 
@@ -94,23 +96,27 @@ function $d30e7bcdac759df9$export$22ae542d2b30e3c1({ zoodb: zoodb, objectType: o
         render_context.registerRenderPreviewCleanupCallback = registerRenderPreviewCleanupCallback;
         let html = `<article class="object_render">`;
         html += (0, $89tWE$sqzhtml)`
-<h1>Object: ${objectType} <code>${objectId}</code></h1>
+<h1>Object: ${(0, $89tWE$escapehtml)(objectType)} <code>${(0, $89tWE$escapehtml)(objectId)}</code></h1>
 `;
         for (const { fieldname: fieldname, fieldvalue: fieldvalue, fieldschema: fieldschema } of (0, $89tWE$iter_object_fields_recursive)(object, schema)){
             if (fieldvalue == null) continue;
             let rendered = null;
             try {
-                rendered = rdr(fieldvalue);
+                // catch references to other DB objects
+                if (typeof fieldvalue === "object" && Object.hasOwn(fieldvalue, "_zoodb")) {
+                    const zoodbInfo = fieldvalue._zoodb;
+                    rendered = (0, $89tWE$escapehtml)(`<Internal Zoo Reference to ‘${zoodbInfo.id}’>`);
+                } else rendered = rdr(fieldvalue);
             } catch (err) {
                 let errstr = null;
                 if (!err) errstr = "??";
                 else if (typeof err === "object" && "__class__" in err && "msg" in err) errstr = err.msg; //zooflm.repr(err);
                 else if (typeof err === "object" && "toString" in err) errstr = "" + err;
                 else errstr = "???";
-                rendered = `<span class="error">(Render error: ${errstr})</span>`;
+                rendered = `<span class="error">(Render error: ${(0, $89tWE$escapehtml)(errstr)})</span>`;
             }
             html += (0, $89tWE$sqzhtml)`
-<h2 class="fieldname">${fieldname}</h2>
+<h2 class="fieldname">${(0, $89tWE$escapehtml)(fieldname)}</h2>
 <div class="fieldcontent">
 ${rendered}
 </div>
