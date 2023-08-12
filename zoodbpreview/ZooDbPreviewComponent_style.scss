@@ -8,45 +8,40 @@
 
     display: grid;
     grid-template-rows: max-content 1fr;
-    grid-template-columns: 150px 1fr 0fr;
+    grid-template-columns: 1fr 0fr;
 
-    .zoodb-preview-select-objecttype {
+    .zoodb-preview-select-bar {
         grid-row-start: 1;
         grid-row-end: 2;
         grid-column-start: 1;
         grid-column-end: 2;
     }
-    .zoodb-preview-select-objectid {
+    .zoodb-preview-command-buttons {
         grid-row-start: 1;
         grid-row-end: 2;
         grid-column-start: 2;
         grid-column-end: 3;
     }
-    .CommandButtonsComponent {
-        grid-row-start: 1;
-        grid-row-end: 2;
-        grid-column-start: 3;
-        grid-column-end: 4;
-    }
 
-    .zoodb-preview-content {
-        min-height: 20px;
-        background-color: rgba(128,128,128,0.3);
-
-        overflow: auto;
-
-        grid-row-start: 2;
-        grid-column-start: 1;
-        grid-column-end: 4;
-
-        padding: 1em;
-
-        .flm-error-message, span.error {
-            display: block;
-            color: rgb(127,0,0);
-            background-color: rgba(255,127,127,0.3);
-            padding: 1em;
+    .zoodb-preview-command-buttons {
+        display: flex;
+        > button {
+            min-width: 40px;
         }
     }
 
+    .zoodb-preview-content {
+        overflow: auto;
+
+        grid-row-start: 2;
+        grid-row-end: 3;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+    .zoodb-preview-messages {
+        grid-row-start: 3;
+        grid-row-end: 4;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
 }

@@ -1277,7 +1277,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=1a0b1e&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=19c9e8&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1298,7 +1298,7 @@ __metadata:
     stream-parser: ^0.3.1
     tippy.js: ^6.3.7
     url: ^0.11.0
-  checksum: 78a9d7c650cdd852462ec7a4bb25c9c15083d219e7ceddcedef735bc71009499047bb42d77a98a32a17245e9fdda5fe1069dec0d78a60deca158332aab5c0e30
+  checksum: 65815ba24e58c2f78ff9716863faaaf177f05cc20e8797b292e86f942c9a5c6e98c6dcbcf98a732d1ef6ee779b3c1cb06cbcdc7365395cdc3b5674f1e2b9c0d2
   languageName: node
   linkType: hard
 
@@ -6019,6 +6019,7 @@ __metadata:
   resolution: "zoodbtools_preview@workspace:zoodbpreview"
   dependencies:
     debug: ^4.3.4
+    mime-types: ^2.1.35
     parcel: ^2.9.3
     react: ^18.2.0
     react-dom: ^18.2.0

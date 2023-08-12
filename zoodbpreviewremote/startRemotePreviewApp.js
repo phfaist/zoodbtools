@@ -156,6 +156,7 @@ export class PreviewAppServer
             if (contents == null) {
                 res.writeHead(404, { 'Content-Type': 'text/plain;charset=utf-8' });
                 res.end(`File not found: ‘${url.pathname}’ (resolved to ‘${distFileName}’)`);
+                debug(`[!] 404 ‘${url.pathname}’`);
                 return;
             }
 

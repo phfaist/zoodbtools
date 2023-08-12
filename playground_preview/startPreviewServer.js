@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+const debug = require('debug')('zoodbtools_playground_preview.startPreviewServer');
+
+
 async function go()
 {
     const { PreviewAppServer } =
@@ -19,11 +22,15 @@ async function go()
                 'hello': 'world',
             },
         },
+
+        startUserBrowser: (process.env.START_USER_BROWSER !== '0')
     };
 
     // completely clean the dist/ dir to avoid files accumulating there
     await fs.promises.rm("dist/", { force: true, recursive: true });
     
+    debug('Starting our preview app server ...');
+
     const appServer = new PreviewAppServer(settings);
 
     await appServer.compileAppAndRunServer();

@@ -5,6 +5,10 @@ import * as zooflm from '@phfaist/zoodb/zooflm';
 import { getfield } from '@phfaist/zoodb/util/getfield';
 import { iter_object_fields_recursive } from '@phfaist/zoodb/util/objectinspector';
 import { sqzhtml } from '@phfaist/zoodb/util/sqzhtml';
+import { split_prefix_label } from '@phfaist/zoodb/util/prefixlabel';
+
+import mime from 'mime-types';
+
 
 // -----------------------------------------------------------------------------
 
@@ -30,26 +34,116 @@ ${ styinfo.css_content }
 }
 
 
+// -----------------------------------------------------------------------------
+
+
+export function installZooFlmEnvironmentLinksAndGraphicsHandlers(
+    zoo_flm_environment,
+    { getGraphicsFileContents }
+)
+{
+    zoo_flm_environment.graphics_collection.src_url_resolver_fn =
+        ({graphics_resource, render_context, source_path}) => {
+
+            const imageData = getGraphicsFileContents(
+                graphics_resource.source_info.resolved_source,
+                { graphics_resource, render_context, source_path }
+            );
+            let mimeType = mime.lookup(
+                graphics_resource.source_info.resolved_source
+            );
+            if (!mimeType) { mimeType = 'image/*'; }
+            const blob = new Blob([ imageData ], { type: mimeType });
+
+            const src_url = URL.createObjectURL(blob);
+
+            debug(`created Blob Object Url ${src_url}`);
+
+            if (render_context.registerRenderPreviewCleanupCallback != null) {
+                render_context.registerRenderPreviewCleanupCallback(
+                    () => {
+                        URL.revokeObjectURL(src_url);
+                        debug(`revoked Blob Object Url ${src_url}`);
+                    }
+                );
+            } else {
+                console.warn(
+                    `Allocated a Blob URL with URL.createObjectURL(), but there was no `
+                    + `registerRenderPreviewCleanupCallback set to register the URL `
+                    + `to be revoked/freed after use`
+                );
+            }
+
+            return { src_url };
+        }
+    ;
+
+    //
+    // Override links to other objects, so we can intercept them.
+    //
+    zoo_flm_environment.ref_resolver.target_href_resolver =
+        (ref_instance, render_context) => {
+
+            const { target_href, ref_type, ref_label } = ref_instance ?? {};
+
+            if (target_href != null) {
+                // maybe fix target_href?
+                const url = new URL(target_href);
+                if (url.protocol == 'zoodbobjectref:') {
+                    // this is a reference set by zoodb/zooflm/zooprocessor.js
+                    //
+                    // [Note, we seem to get all the slashes as part of the
+                    // pathname in "protocol:///code/ref" when running in the
+                    // browser]
+                    const objectRef = url.pathname.replace(/^\/+/, '');
+
+                    const [objectType, objectId] = split_prefix_label(objectRef);
+                    let qData = {
+                        objectType, objectId,
+                    };
+                    if (url.hash && url.hash.startsWith('#')) {
+                        qData.anchor = decodeURIComponent(url.hash.slice(1));
+                    }
+                    return (`jsOnLinkClick:objectLink`
+                            + `?q=${encodeURIComponent(JSON.stringify(qData))}`);
+                }
+                return target_href;
+            }
+            
+            const alertMsg = `Could not resolve link reference to ‘${ref_type}:${ref_label}’`;
+            return(`javascript:alert(${JSON.stringify(alertMsg)}`);
+        }
+    ;
+
+}
+
+
 
 // -----------------------------------------------------------------------------
 
 
-export function simpleRenderObjectWithFlm(zoodb, object_type, object_id, object)
+export function simpleRenderObjectWithFlm({
+    zoodb, objectType, objectId, object,
+    registerRenderPreviewCleanupCallback,
+})
 {
     const zoo_flm_environment = zoodb.zoo_flm_environment;
 
-    const schema = zoodb.schemas[object_type];
+    const schema = zoodb.schemas[objectType];
 
-    debug(`renderObject(): ${object_type} ${object_id}`);
+    debug(`renderObject(): ${objectType} ${objectId}`);
 
     const render_doc_fn = (render_context) => {
         const R = zooflm.make_render_shorthands({render_context});
         const { ne, rdr, ref } = R;
 
+        render_context.registerRenderPreviewCleanupCallback =
+            registerRenderPreviewCleanupCallback;
+
         let html = `<div class="object_render">`;
 
         html += sqzhtml`
-<h1>Object: ${object_type} <code>${object_id}</code></h1>
+<h1>Object: ${objectType} <code>${objectId}</code></h1>
 `;
 
         for (const {fieldname, fieldvalue, fieldschema}
@@ -91,12 +185,16 @@ ${ rendered }
         return html;
     };
 
-    return zooflm.make_and_render_document({
+    let htmlContent = zooflm.make_and_render_document({
         zoo_flm_environment,
         render_doc_fn,
         //doc_metadata,
         render_endnotes: true,
         flm_error_policy: 'continue',
     });
+
+    return {
+        htmlContent,
+    };
 }
 

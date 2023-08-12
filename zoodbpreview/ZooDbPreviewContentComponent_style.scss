@@ -1,0 +1,41 @@
+.zoodb-preview-content
+{
+    min-height: 20px;
+    background-color: rgba(128,128,128,0.3);
+
+    padding: 1em;
+
+    .visual-highlight {
+        background-color: rgba(127,127,0,0.5) !important;
+        box-shadow: rgba(127,127,0,0.5) 0px 0px 10px;
+        transition: background-color 0.4s;
+    }
+}
+
+.zoodb-preview-messages {
+    > p, > div {
+        margin: 0px;
+        padding: 1em 1em;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+}
+
+.zoodb-preview-messages, .zoodb-preview-content
+{
+    .flm-error-message, .error {
+        display: block;
+        color: rgb(110, 0, 0);
+        background-color: rgba(255, 127, 127, 0.8);
+        padding: 1em;
+    }
+    .info {
+        display: block;
+        color: rgb(0,0,127);
+        background-color: rgb(180,180,255);
+    }
+    .small-caption {
+        font-size: 1rem;
+        font-weight: normal;
+    }
+}

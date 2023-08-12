@@ -1,25 +1,35 @@
 {
-  "name": "zoodbtools_preview",
-  "version": "0.1.0",
-  "type": "module",
-  "source": "all.js",
-  "main": "dist/all.js",
-  "dependencies": {
-    "debug": "^4.3.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-select": "^5.7.4"
-  },
-  "devDependencies": {
-    "parcel": "^2.9.3"
-  },
-  "peerDependencies": {
-    "@phfaist/zoodb": "*"
-  },
-  "scripts": {
-    "build": "parcel build --no-optimize"
-  },
-  "exports": {
-    "*": "dist/*.js"
-  }
+    "name": "zoodbtools_preview",
+    "version": "0.1.0",
+    "type": "module",
+    "targets": {
+        "module": {
+            "source": [
+                "useZooDbAccessState.js",
+                "citationapiplaceholder.js",
+                "renderFlm.js",
+                "all.js"
+            ]
+        }
+    },
+    "dependencies": {
+        "debug": "^4.3.4",
+        "mime-types": "^2.1.35",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-select": "^5.7.4"
+    },
+    "devDependencies": {
+        "parcel": "^2.9.3"
+    },
+    "peerDependencies": {
+        "@phfaist/zoodb": "*"
+    },
+    "scripts": {
+        "build": "parcel build"
+    },
+    "exports": {
+        ".": "./dist/module/all.js",
+        "./*": "./dist/module/*.js"
+    }
 }

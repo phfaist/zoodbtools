@@ -4,170 +4,142 @@ const debug = debug_mod('zoodbtoolspreview.ZooDbPreviewComponent');
 import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 
+import { ZooDbSelectObjectTypeAndIdComponent } from './ZooDbSelectObjectTypeAndIdComponent.jsx';
+import { ZooDbPreviewContentComponent } from './ZooDbPreviewContentComponent.jsx';
+import { useZooDbAccessState } from './useZooDbAccessState.js';
+
 import './ZooDbPreviewComponent_style.scss';
 
 
 
 
-
-// -----------------------------------------------------------------------------
-
-
-
 export function ZooDbPreviewComponent(props)
 {
+    debug(`ZooDbPreviewComponent()`, { props });
+
     let {
-        zoodb,
+        loadZooDb,
+        reloadZooDb,
         renderObject,
-        objectType,
-        objectId,
+        initialObjectType,
+        initialObjectId,
         getMathJax,
-        installFlmObjectLinkCallback,
-        incompleteSelectionRenderHtml,
-        CommandButtonsComponent,
+        // incompleteSelectionRenderHtml,
+        // CommandButtonsComponent,
+        commandButtonsUseReload,
+        commandButtonsToggleDarkModeCallback,
     } = props;
 
-    objectType ||= "";
-    objectId ||= "";
+    initialObjectType ||= "";
+    initialObjectId ||= "";
 
     // React states and effects --
 
     const [ selectedObjectTypeAndId, setSelectedObjectTypeAndId ] = useState(
         {
-            selectedObjectType: objectType,
-            selectedObjectId: objectId,
+            objectType: initialObjectType,
+            objectId: initialObjectId,
         }
     );
 
-    const [ previewingZooVersion, setPreviewingZooVersion ] = useState(0);
+    //const [ previewingZooVersion, setPreviewingZooVersion ] = useState(0);
 
-    const renderContentDomNodeRef = useRef(null);
-
-    useEffect(
-        () => {
-            const domNode = renderContentDomNodeRef.current;
-
-            //
-            // scroll to the top of the preview pane
-            //
-            domNode.scrollTo({top: 0});
-
-            //
-            // render math if applicable
-            //
-            if (!getMathJax) {
-                return;
-            }
-            const MJ = getMathJax();
-            if (MJ) {
-                MJ.typesetPromise([domNode]);
-            }
-
-            return;
-        },
-        [ selectedObjectTypeAndId, previewingZooVersion ]
-    );
-
-    // useful callbacks --
-    
-    const { selectedObjectType, selectedObjectId } = selectedObjectTypeAndId;
-    const setSelectedObjectType = (newObjectType) => setSelectedObjectTypeAndId({
-        selectedObjectType: newObjectType,
-        selectedObjectId: ""
+    const zooDbAccess = useZooDbAccessState({
+        loadZooDb, reloadZooDb,
+        //triggerInitialLoad: true, // this is the default
     });
-    const setSelectedObjectId = (newObjectId) => setSelectedObjectTypeAndId({
-        selectedObjectType,
-        selectedObjectId: newObjectId,
-    });
-    const setSelectedPairTypeId = (selectedObjectType, selectedObjectId) =>
-          setSelectedObjectTypeAndId({selectedObjectType, selectedObjectId}) ;
 
-    if (installFlmObjectLinkCallback) {
-        const [ callbackHolder, callbackMethod ] = installFlmObjectLinkCallback;
-        callbackHolder[callbackMethod] = (objType, objId) => {
-            console.log(`Loading preview component → ${objType} ${objId}`);
-            setSelectedPairTypeId(objType, objId);
-        };
-    }
+    debug(`got ZooDbAccess object: `, zooDbAccess);
 
     // render --
 
-    let allObjectTypes = Object.keys(zoodb.objects);
-    allObjectTypes.sort();
+    const { objectType, objectId } = selectedObjectTypeAndId;
 
-    let selectObjectTypeOptions = allObjectTypes.map(
-        (x) => ({ value: x, label: x })
-    );
-    selectObjectTypeOptions.push(
-        { value: "", label: "(select object type)" }
-    )
+    const onLinkClick = (event, { a, targetHref, targetInternalAnchor }) => {
+        if (targetInternalAnchor != null) {
+            const element = document.getElementById(targetInternalAnchor);
+            if (element != null) {
+                element.scrollIntoView(true);
+                element.classList.add("visual-highlight");
+                setTimeout(
+                    () => element.classList.remove("visual-highlight"),
+                    1000 // milliseconds
+                );
+                event.preventDefault();
+            }
+            return;
+        }
+        const url = new URL(targetHref);
+        debug(`Clicked on a link, url = `, url);
+        if (url.protocol.toLowerCase() === 'jsOnLinkClick:'.toLowerCase()) {
+            // meant to be captured by our callback
+            const action = url.pathname;
+            const q = JSON.parse(url.searchParams.get('q'));
+            if (action === 'objectLink') {
+                setSelectedObjectTypeAndId({objectType: q.objectType, objectId: q.objectId});
+                if (q.anchor) {
+                    // TODO: scroll to a certain anchor, if applicable.
+                    console.log(`Not yet implemented: scroll to #${q.anchor} after load`);
+                }
+                event.preventDefault();
+                return;
+            }
+            throw new Error(`Invalid internal jsOnLinkClick action: ‘${action}’`);
+        }
+        return;
+    };
 
-    let selectObjectIdOptions = [];
-    if (selectedObjectType && zoodb.objects[selectedObjectType]) {
-        let allObjectIds = Object.keys(zoodb.objects[selectedObjectType]);
-        allObjectIds.sort();
+    let commandButtonsContents = [];
 
-        selectObjectIdOptions = allObjectIds.map(
-            (x) => ({ value: x, label: x })
+    if (commandButtonsUseReload) {
+        const canReload = (
+            zooDbAccess.status === 'loaded'
+            || zooDbAccess.status === 'load-error'
+            || zooDbAccess.status === 'empty'
+        );
+        commandButtonsContents.push(
+            <button
+                onClick={() => zooDbAccess.reload()}
+                disabled={!canReload}
+            >RELOAD ZOO</button>
         );
     }
-    selectObjectIdOptions.push(
-        { value: "", label: "(select object)" }
-    );
-
-    debug(`Rendering component, selected ${selectedObjectType} ‘${selectedObjectId}’`);
-
-    let previewHtml = '';
-
-    let object = null;
-    if (selectedObjectType && selectedObjectId && zoodb.objects[selectedObjectType]) {
-        object = zoodb.objects[selectedObjectType][selectedObjectId];
-    }
-    if (object) {
-        previewHtml = renderObject(zoodb, selectedObjectType, selectedObjectId, object);
-        debug(`Rendered HTML -> `, { previewHtml });
-    } else if (incompleteSelectionRenderHtml != null) {
-        previewHtml = incompleteSelectionRenderHtml(
-            zoodb, selectedObjectType, selectedObjectId
+    if (commandButtonsToggleDarkModeCallback != null
+        && commandButtonsToggleDarkModeCallback !== false) {
+        commandButtonsContents.push(
+            <button
+                onClick={(event) => commandButtonsToggleDarkModeCallback(event)}
+            >🌒</button>
         );
-        debug(`Rendered HTML for incomplete selection -> `, { previewHtml });
-    } else {
-        previewHtml = `Please select an object to preview using the selection boxes above.`
     }
 
-    let commandButtonsComponentContents = []
-    if (CommandButtonsComponent != null) {
-        const commandButtonsProps = {
-            zoodb, selectedObjectTypeAndId, setSelectedObjectTypeAndId, object,
-            doRefreshPreview: () => setPreviewingZooVersion(previewingZooVersion + 1)
-        };
-        commandButtonsComponentContents = [(
-            <CommandButtonsComponent {...commandButtonsProps} />
-        )];
-    }
+    if (commandButtonsContents.length > 0) {
+        commandButtonsContents = (
+            <div className="zoodb-preview-command-buttons">
+                {commandButtonsContents}
+            </div>
+        );
+    };
 
     return (
         <div className="ZooDbPreviewComponent">
-            <Select
-                className="zoodb-preview-select-objecttype"
-                classNamePrefix="zoodb-preview-react-select"
-                value={{value: selectedObjectType, label: selectedObjectType}}
-                onChange={(newValue) => setSelectedObjectType(newValue.value)}
-                options={selectObjectTypeOptions}
+            <ZooDbSelectObjectTypeAndIdComponent
+                zoodb={zooDbAccess.zoodb}
+                objectType={selectedObjectTypeAndId.objectType}
+                objectId={selectedObjectTypeAndId.objectId}
+                onChangeObjectTypeAndId={
+                    (objectType, objectId) => setSelectedObjectTypeAndId({objectType, objectId})
+                }
             />
-            <Select
-                className="zoodb-preview-select-objectid"
-                classNamePrefix="zoodb-preview-react-select"
-                value={{value: selectedObjectId, label: selectedObjectId }}
-                onChange={(newValue) => setSelectedObjectId(newValue.value)}
-                options={selectObjectIdOptions}
+            <ZooDbPreviewContentComponent
+                zooDbAccessState={zooDbAccess.state}
+                objectType={objectType}
+                objectId={objectId}
+                renderObject={renderObject}
+                getMathJax={getMathJax}
+                onLinkClick={onLinkClick}
             />
-            <div className="zoodb-preview-content"
-                 ref={renderContentDomNodeRef}
-                 dangerouslySetInnerHTML={ {__html: previewHtml} }
-            >
-            </div>
-            {commandButtonsComponentContents}
+            {commandButtonsContents}
         </div>
     );
 }

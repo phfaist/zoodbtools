@@ -11,7 +11,8 @@ import { ZooDbPreviewComponent } from 'zoodbtools_preview';
 
 import { fsRemoteCreateClient } from 'zoodbtools_previewremote/useFsRemote.js';
 import {
-    installFlmContentStyles, simpleRenderObjectWithFlm
+    installFlmContentStyles, simpleRenderObjectWithFlm,
+    installZooFlmEnvironmentLinksAndGraphicsHandlers,
 } from 'zoodbtools_preview';
 
 //import * as zooflm from '@phfaist/zoodb/zooflm';
@@ -117,20 +118,12 @@ export class MyZooDb extends StandardZooDb
             },
 
             zoo_permalinks: {
-                object: (object_type, object_id) => (
-                    `javascript:window.appFlmCallbackObjectLink(`
-                        + `${JSON.stringify(object_type)},${JSON.stringify(object_id)}`
-                    + `)`
+                object: (objectType, objectId) => (
+                    `invalid:zooObjectLink/${objectType}/${objectId}`
                 ),
-                graphics_resource: (graphics_resource) => {
-                    const imageData = fs.readFileSync(
-                        path.join(config.fs_data_dir,
-                                  graphics_resource.source_info.resolved_source)
-                    );
-                    const blob = new Blob([ imageData ]);
-                    console.error(`TODO: make sure we release the object URL resource created by URL.createObjectURL!!!`);
-                    return URL.createObjectURL(blob);
-                },
+                graphics_resource: (graphics_resource) => (
+                    `invalid:graphicsResource/${graphics_resource.src_url}`
+                ),
             },
 
         }, config));
@@ -200,29 +193,29 @@ export class MyZooDbYamlDataLoader extends StandardZooDbYamlDataLoader
 
 
 
-function ReloadCommandButtonsComponent(props)
-{
-    const { zoodb, doRefreshPreview } = props;
+// function ReloadCommandButtonsComponent(props)
+// {
+//     const { zoodb, doRefreshPreview } = props;
 
-    const btnDomRef = useRef(null);
+//     const btnDomRef = useRef(null);
 
-    const doReloadZoo = async () => {
-        btnDomRef.current.disabled = true;
-        try {
-            await zoodb.load()
-            debug(`Finished reloading the zoo.`);
-        } finally {
-            btnDomRef.current.disabled = false;
-            doRefreshPreview();
-        }
-    };
+//     const doReloadZoo = async () => {
+//         btnDomRef.current.disabled = true;
+//         try {
+//             await zoodb.load()
+//             debug(`Finished reloading the zoo.`);
+//         } finally {
+//             btnDomRef.current.disabled = false;
+//             doRefreshPreview();
+//         }
+//     };
 
-    return (
-        <div className="CommandButtonsComponent">
-            <button onClick={doReloadZoo} ref={btnDomRef}>RELOAD ZOO</button>
-        </div>
-    );
-};
+//     return (
+//         <div className="CommandButtonsComponent">
+//             <button onClick={doReloadZoo} ref={btnDomRef}>RELOAD ZOO</button>
+//         </div>
+//     );
+// };
 
 
 
@@ -238,81 +231,115 @@ window.addEventListener('load', async () => {
 
     const container = window.document.getElementById('AppContainer');
 
-    // create our ZooDb instance for our previews
+    const loadZooDb = async () => {
+        //
+        // create our ZooDb instance for our previews
+        //
 
-    // get custom data that the preview server might want to communicate to us
-    const serverData = await (await fetch("/appData.json")).json();
+        // get custom data that the preview server might want to communicate to us
+        const serverData = await (await fetch("/appData.json")).json();
 
-    debug(`Got serverData = `, serverData);
-    
-    //BrowserFS.install(window);
+        debug(`Got serverData = `, serverData);
+        
+        //BrowserFS.install(window);
 
-    // const fs = await new Promise( (accept, reject) => {
-    //     BrowserFS.configure({
-    //         fs: "LocalStorage"
-    //     }, function(e) {
-    //         if (e) {
-    //             // An error happened!
-    //             reject(e);
-    //         }
-    //         // Otherwise, BrowserFS is ready-to-use!
-    //         const fs = BrowserFS.BFSRequire('fs');
-    //         accept(fs);
-    //     });
-    // } );
-    // debug(`Got fs object`, { fs });
+        // const fs = await new Promise( (accept, reject) => {
+        //     BrowserFS.configure({
+        //         fs: "LocalStorage"
+        //     }, function(e) {
+        //         if (e) {
+        //             // An error happened!
+        //             reject(e);
+        //         }
+        //         // Otherwise, BrowserFS is ready-to-use!
+        //         const fs = BrowserFS.BFSRequire('fs');
+        //         accept(fs);
+        //     });
+        // } );
+        // debug(`Got fs object`, { fs });
 
-    // connect to remote FS
+        // connect to remote FS
 
-    const fs = fsRemoteCreateClient();
-
-
-    // // DEBUG fs-remote
-    //
-    // container.innerText = fs.readdirSync('.') .join('\n');
-    // return;
-    //
-    // fs.readFile(
-    //     'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8' },
-    //     (err, result) => { container.innerText = result }
-    // );
-    // let mydata = await fs.promises.readFile( 'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8' });
-    // console.log('MYDATA:', mydata);
-    // return;
+        const fs = fsRemoteCreateClient();
 
 
-    let zoodbOpts = {
+        // // DEBUG fs-remote
+        //
+        // container.innerText = fs.readdirSync('.') .join('\n');
+        // return;
+        //
+        // fs.readFile(
+        //     'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8' },
+        //     (err, result) => { container.innerText = result }
+        // );
+        // let mydata = await fs.promises.readFile( 'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8' });
+        // console.log('MYDATA:', mydata);
+        // return;
 
-        fs, // filesystem object - fs - here, from fs-remote
-        fs_data_dir: `${root_data_dir}/data/`,
 
-        csl_style: await fs.promises.readFile( 'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8', }, )
+        let zoodbOpts = {
+
+            fs, // filesystem object - fs - here, from fs-remote
+            fs_data_dir: `${root_data_dir}/data/`,
+
+            csl_style: await fs.promises.readFile( 'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8', }, )
+        };
+
+        const zoodb = new MyZooDb(zoodbOpts);
+
+        zoodb.install_zoo_loader(new MyZooDbYamlDataLoader());
+
+        await zoodb.load();
+
+        installZooFlmEnvironmentLinksAndGraphicsHandlers(
+            zoodb.zoo_flm_environment,
+            {
+                getGraphicsFileContents: (fname) => {
+                    return fs.readFileSync(path.join(zoodbOpts.fs_data_dir, fname));
+                }
+            }
+        );
+
+        // // add a "fallback" ref resolver for invalid refs.
+        // zoodb.zoo_flm_environment.feature_refs.add_external_ref_resolver(
+        //     {
+        //         get_ref(ref_type, ref_label, resource_info, render_context) {
+        //             debug(`Default ref_resolver called for invalid reference `
+        //                   + `‘${ref_type}:${ref_label}’`);
+        //             return zooflm.RefInstance(
+        //                 // ref_type, ref_label, formatted_ref_flm_text, target_href
+        //                 ref_type, ref_label,
+        //                 '<??>', null
+        //             );
+        //         }
+        //     }
+        // );
+
+
+        // for in-browser debugging
+        window.zoodb = zoodb;
+
+        return zoodb;
     };
 
-    const zoodb = new MyZooDb(zoodbOpts);
-    zoodb.install_zoo_loader(new MyZooDbYamlDataLoader());
 
-    await zoodb.load();
+    const reloadZooDb = async (zoodb) => {
+        await zoodb.load();
 
-    
-    // // add a "fallback" ref resolver for invalid refs.
-    // zoodb.zoo_flm_environment.feature_refs.add_external_ref_resolver(
-    //     {
-    //         get_ref(ref_type, ref_label, resource_info, render_context) {
-    //             debug(`Default ref_resolver called for invalid reference `
-    //                   + `‘${ref_type}:${ref_label}’`);
-    //             return zooflm.RefInstance(
-    //                 // ref_type, ref_label, formatted_ref_flm_text, target_href
-    //                 ref_type, ref_label,
-    //                 '<??>', null
-    //             );
-    //         }
-    //     }
-    // );
+        // test internal error during reload
+        //throw new Error(`Failed to reload zoo! test error handling!`);
 
+        return zoodb;
+    };
 
-    // for in-browser debugging
-    window.zoodb = zoodb;
+    const renderObject = async ({zoodb, objectType, objectId, object,
+                                 registerRenderPreviewCleanupCallback }) => {
+        let { htmlContent } = await simpleRenderObjectWithFlm({
+            zoodb, objectType, objectId, object,
+            registerRenderPreviewCleanupCallback
+        });
+        return { htmlContent };
+    };
 
     //
     // Render the app
@@ -320,15 +347,21 @@ window.addEventListener('load', async () => {
     const reactRoot = createRoot(container);
     reactRoot.render(
         <ZooDbPreviewComponent
-            zoodb={zoodb}
-            renderObject={simpleRenderObjectWithFlm}
+            loadZooDb={loadZooDb}
+            reloadZooDb={reloadZooDb}
+            renderObject={renderObject}
             getMathJax={() => window.MathJax}
-            objectType={'person'}
-            objectId={'bob'}
-            installFlmObjectLinkCallback={[window,'appFlmCallbackObjectLink']}
-            CommandButtonsComponent={ReloadCommandButtonsComponent}
+            initialObjectType={'person'}
+            initialObjectId={'bob'}
+            commandButtonsUseReload={true}
+            commandButtonsToggleDarkModeCallback={
+                () => { document.documentElement.classList.toggle('dark'); }
+            }
         />
     );
+            // installFlmObjectLinkCallback={[window,'appFlmCallbackObjectLink']}
+            // CommandButtonsComponent={ReloadCommandButtonsComponent}
+
             // objectType={'code'}
             // objectId={'css'}
 
