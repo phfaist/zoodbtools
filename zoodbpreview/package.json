@@ -2,6 +2,7 @@
     "name": "zoodbtools_preview",
     "version": "0.1.0",
     "type": "module",
+    "main": "./dist/module/all.js",
     "targets": {
         "module": {
             "source": [
