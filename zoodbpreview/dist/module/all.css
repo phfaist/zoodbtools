@@ -1,0 +1,119 @@
+.zoodb-preview-content {
+  min-height: 20px;
+  background-color: #8080804d;
+  padding: 1em;
+}
+
+.zoodb-preview-content .visual-highlight {
+  transition: background-color .4s;
+  box-shadow: 0 0 10px #7f7f0080;
+  background-color: #7f7f0080 !important;
+}
+
+.zoodb-preview-messages > p, .zoodb-preview-messages > div {
+  margin: 0;
+  padding: 1em;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.zoodb-preview-messages .flm-error-message, .zoodb-preview-messages .error, .zoodb-preview-content .flm-error-message, .zoodb-preview-content .error {
+  color: #6e0000;
+  background-color: #ff7f7fcc;
+  padding: 1em;
+  display: block;
+}
+
+.zoodb-preview-messages .info, .zoodb-preview-content .info {
+  color: #00007f;
+  background-color: #b4b4ff;
+  display: block;
+}
+
+.zoodb-preview-messages .small-caption, .zoodb-preview-content .small-caption {
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.zoodb-preview-select-bar {
+  display: flex;
+}
+
+.zoodb-preview-select-bar .zoodb-preview-select-objecttype {
+  flex: 120px;
+}
+
+.zoodb-preview-select-bar .zoodb-preview-select-objectid {
+  flex: 3 400px;
+}
+
+.dark .zoodb-preview-content {
+  background-color: #8080800d;
+}
+
+.dark .zoodb-preview-content .flm-error-message, .dark .zoodb-preview-content span.error {
+  color: #ff8278;
+  background-color: #5000004d;
+  padding: 1em;
+  display: block;
+}
+
+.dark .zoodb-preview-react-select__control, .dark .zoodb-preview-react-select__input-container, .dark .zoodb-preview-react-select__single-value, .dark .zoodb-preview-react-select__menu, .dark .zoodb-preview-react-select__indicator {
+  color: #fff;
+}
+
+.dark .zoodb-preview-react-select__control, .dark .zoodb-preview-react-select__menu, .dark .zoodb-preview-react-select__indicator {
+  background-color: #000;
+}
+
+.dark .zoodb-preview-react-select__indicator-separator {
+  background-color: #aaa;
+}
+
+.dark .zoodb-preview-react-select__control {
+  border-color: #555;
+}
+
+.dark .zoodb-preview-react-select__option {
+  color: #fff;
+  background-color: #000;
+}
+
+.dark .zoodb-preview-react-select__option:hover {
+  color: #fff;
+  background-color: #777;
+}
+
+.ZooDbPreviewComponent {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  grid-template-rows: max-content 1fr;
+  grid-template-columns: 1fr 0fr;
+  padding: 0;
+  display: grid;
+}
+
+.ZooDbPreviewComponent .zoodb-preview-select-bar {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.ZooDbPreviewComponent .zoodb-preview-command-buttons {
+  grid-area: 1 / 2 / 2 / 3;
+  display: flex;
+}
+
+.ZooDbPreviewComponent .zoodb-preview-command-buttons > button {
+  min-width: 40px;
+}
+
+.ZooDbPreviewComponent .zoodb-preview-content {
+  grid-area: 2 / 1 / 3 / 3;
+  overflow: auto;
+}
+
+.ZooDbPreviewComponent .zoodb-preview-messages {
+  grid-area: 3 / 1 / 4 / 3;
+}
+
+/*# sourceMappingURL=all.css.map */

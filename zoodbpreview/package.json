@@ -5,10 +5,10 @@
     "targets": {
         "module": {
             "source": [
+                "all.js",
                 "useZooDbAccessState.js",
                 "citationapiplaceholder.js",
-                "renderFlm.js",
-                "all.js"
+                "renderFlm.js"
             ]
         }
     },
