@@ -90,9 +90,16 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, triggerInitialLoad
 
     const doReload = () => {
         debug(`Called doReload()`);
-        if (zooDbLoadState.status != 'loaded') {
+        if (zooDbLoadState.status === 'empty') {
             console.error(
-                `useZooDbAccessState: Zoo isn't fully loaded yet, cannot reload().`
+                `useZooDbAccessState: Zoo must undergo initial load() before `
+                + `reload() can be called`
+            );
+            return;
+        }
+        if (zooDbLoadState.status === 'loading' || zooDbLoadState.status === 'reloading') {
+            console.error(
+                `useZooDbAccessState: Zoo is still loading, cannot reload().`
             );
             return;
         }

@@ -418,8 +418,12 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
     };
     const doReload = ()=>{
         $cdbe94ce1f253c89$var$debug(`Called doReload()`);
-        if (zooDbLoadState.status != "loaded") {
-            console.error(`useZooDbAccessState: Zoo isn't fully loaded yet, cannot reload().`);
+        if (zooDbLoadState.status === "empty") {
+            console.error(`useZooDbAccessState: Zoo must undergo initial load() before ` + `reload() can be called`);
+            return;
+        }
+        if (zooDbLoadState.status === "loading" || zooDbLoadState.status === "reloading") {
+            console.error(`useZooDbAccessState: Zoo is still loading, cannot reload().`);
             return;
         }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
