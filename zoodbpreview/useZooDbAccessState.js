@@ -103,6 +103,14 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, triggerInitialLoad
             );
             return;
         }
+        if (zooDbLoadState.status === 'load-error' && zooDbLoadState.zoodb == null) {
+            // there was an error in the initial load, we should try the initial
+            // load again.
+            console.log("*** Error in initial load, initiating initial load again ***");
+            let promise = loadZooDb();
+            doSetupLoadStateFromPromise(promise, 'loading');
+            return;
+        }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
         doSetupLoadStateFromPromise(promise, 'reloading');
     };

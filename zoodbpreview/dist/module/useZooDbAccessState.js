@@ -82,6 +82,14 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             console.error(`useZooDbAccessState: Zoo is still loading, cannot reload().`);
             return;
         }
+        if (zooDbLoadState.status === "load-error" && zooDbLoadState.zoodb == null) {
+            // there was an error in the initial load, we should try the initial
+            // load again.
+            console.log("*** Error in initial load, initiating initial load again ***");
+            let promise = loadZooDb();
+            doSetupLoadStateFromPromise(promise, "loading");
+            return;
+        }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
         doSetupLoadStateFromPromise(promise, "reloading");
     };
