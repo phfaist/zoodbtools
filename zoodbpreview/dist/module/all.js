@@ -120,9 +120,12 @@ function $e81314a651474654$export$3876c21e2ad479cc({ renderContent: renderConten
                         await MJ.typesetPromise([
                             domNode
                         ]);
-                        offloadCallbackFnList.push(()=>MJ.typesetClear([
+                        offloadCallbackFnList.push(()=>{
+                            MJ.texReset?.();
+                            MJ.typesetClear([
                                 domNode
-                            ]));
+                            ]);
+                        });
                     }
                 }
             }
