@@ -59,7 +59,7 @@ export function installZooFlmEnvironmentLinksAndGraphicsHandlers(
 
             const src_url = URL.createObjectURL(blob);
 
-            debug(`created Blob Object Url ${src_url}`);
+            debug(`created Blob Object Url ${src_url} with mime type ${mimeType}`, imageData);
 
             if (render_context.registerRenderPreviewCleanupCallback != null) {
                 render_context.registerRenderPreviewCleanupCallback(

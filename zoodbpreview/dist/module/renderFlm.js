@@ -45,7 +45,7 @@ function $d30e7bcdac759df9$export$73d82f0ed63f6ba5(zoo_flm_environment, { getGra
             type: mimeType
         });
         const src_url = URL.createObjectURL(blob);
-        $d30e7bcdac759df9$var$debug(`created Blob Object Url ${src_url}`);
+        $d30e7bcdac759df9$var$debug(`created Blob Object Url ${src_url} with mime type ${mimeType}`, imageData);
         if (render_context.registerRenderPreviewCleanupCallback != null) render_context.registerRenderPreviewCleanupCallback(()=>{
             URL.revokeObjectURL(src_url);
             $d30e7bcdac759df9$var$debug(`revoked Blob Object Url ${src_url}`);
