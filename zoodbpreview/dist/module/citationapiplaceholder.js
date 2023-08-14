@@ -4,6 +4,7 @@ import {CitationSourceBase as $9Gy6l$CitationSourceBase} from "@phfaist/zoodb/ci
 class $101c10e2432771ff$export$143e0941d05399df extends (0, $9Gy6l$CitationSourceBase) {
     constructor(options){
         options ||= {};
+        options.placeholder_name ??= "[custom citation source api placeholder]";
         const override_options = {
             source_name: `${options.placeholder_name} (placeholder)`,
             chunk_size: Infinity,
@@ -23,17 +24,16 @@ class $101c10e2432771ff$export$143e0941d05399df extends (0, $9Gy6l$CitationSourc
         for (let cite_key of id_list){
             cite_key = cite_key.trim();
             const cite_key_encoded = encodeURIComponent(cite_key);
-            const cached_info = this.search_in_compiled_cache[`${this.cite_prefix}:${cite_key}`];
-            if (cached_info != null) {
-                const cached_compiled_flm_text = cached_info.value?.citation_text;
-                if (cached_compiled_flm_text) {
-                    this.citation_manager.store_citation(this.cite_prefix, cite_key, {
-                        _ready_formatted: {
-                            flm: cached_compiled_flm_text
-                        }
-                    }, this.cache_store_options);
-                    continue;
-                }
+            let cached_compiled_flm_text = this.search_in_compiled_cache?.[`${this.cite_prefix}:${cite_key}`]?.value?.citation_text;
+            if (!cached_compiled_flm_text) // other form of cache, e.g., JSON exported references
+            cached_compiled_flm_text = this.search_in_compiled_cache?.[this.cite_prefix]?.[cite_key];
+            if (cached_compiled_flm_text) {
+                this.citation_manager.store_citation(this.cite_prefix, cite_key, {
+                    _ready_formatted: {
+                        flm: cached_compiled_flm_text
+                    }
+                }, this.cache_store_options);
+                continue;
             }
             let flm_text = null;
             if (typeof this.options.title === "function") flm_text = this.options.title(cite_key);

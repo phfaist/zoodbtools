@@ -6,6 +6,7 @@ export class CitationSourceApiPlaceholder extends CitationSourceBase
     constructor(options)
     {
         options ||= {};
+        options.placeholder_name ??= '[custom citation source api placeholder]';
 
         const override_options = {
             source_name: `${options.placeholder_name} (placeholder)`,
@@ -37,18 +38,24 @@ export class CitationSourceApiPlaceholder extends CitationSourceBase
             cite_key = cite_key.trim();
             const cite_key_encoded = encodeURIComponent(cite_key);
             
-            const cached_info =
-                  this.search_in_compiled_cache[`${this.cite_prefix}:${cite_key}`];
-            if (cached_info != null) {
-                const cached_compiled_flm_text = cached_info.value?.citation_text;
-                if (cached_compiled_flm_text) {
-                    this.citation_manager.store_citation(
-                        this.cite_prefix, cite_key,
-                        { _ready_formatted: { flm: cached_compiled_flm_text } },
-                        this.cache_store_options
-                    );
-                    continue;
-                }
+            let cached_compiled_flm_text = (
+                this.search_in_compiled_cache?.[`${this.cite_prefix}:${cite_key}`]
+                ?.value?.citation_text
+            );
+            if (!cached_compiled_flm_text) {
+                // other form of cache, e.g., JSON exported references
+                cached_compiled_flm_text = (
+                    this.search_in_compiled_cache?.[this.cite_prefix]?.[cite_key]
+                );
+            }
+
+            if (cached_compiled_flm_text) {
+                this.citation_manager.store_citation(
+                    this.cite_prefix, cite_key,
+                    { _ready_formatted: { flm: cached_compiled_flm_text } },
+                    this.cache_store_options
+                );
+                continue;
             }
 
             let flm_text = null;
