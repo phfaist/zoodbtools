@@ -28,7 +28,7 @@ export function ZooDbPreviewComponent(props)
         // CommandButtonsComponent,
         commandButtonsUseReload,
         commandButtonsToggleDarkModeCallback,
-        loadVersion,
+        userLoadVersion,
     } = props;
 
     initialObjectType ||= "";
@@ -47,7 +47,7 @@ export function ZooDbPreviewComponent(props)
 
     const zooDbAccess = useZooDbAccessState({
         loadZooDb, reloadZooDb,
-        loadVersion, // used to trigger reloads externally through our props
+        userLoadVersion, // used to trigger reloads externally through our props
         //triggerInitialLoad: true, // this is the default
     });
 
@@ -142,6 +142,7 @@ export function ZooDbPreviewComponent(props)
                 onLinkClick={onLinkClick}
             />
             {commandButtonsContents}
+            {props.children}
         </div>
     );
 }

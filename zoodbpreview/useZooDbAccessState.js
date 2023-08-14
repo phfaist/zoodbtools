@@ -9,9 +9,9 @@ import React, { useState, useEffect } from 'react';
  * freshly loaded ZooDb instance, the latter takes the zoodb to reload as its
  * only argument and returns the reloaded ZooDb instance.
  */
-export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, triggerInitialLoad })
+export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, triggerInitialLoad })
 {
-    loadVersion ??= 0;
+    userLoadVersion ??= 0;
     triggerInitialLoad ??= true;
 
     // debug(`useZooDbAccessState()`);
@@ -33,15 +33,15 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
         _promise: null,
         // a flag that we increase to ensure the state changes after the zoo is
         // reloaded.  There are two flags, one controlling any externally
-        // requested reloads (loadVersion) and one controlling internally
+        // requested reloads (userLoadVersion) and one controlling internally
         // requested reloads.
-        loadVersion,
+        userLoadVersion,
         internalLoadVersion: 0,
     });
 
-    debug(`useZooDbAccessState() - `, zooDbLoadState, { loadVersion });
+    debug(`useZooDbAccessState() - `, zooDbLoadState, { userLoadVersion });
 
-    const doSetupLoadStateFromPromise = (promise, { loadingStatus, newLoadVersion}) => {
+    const doSetupLoadStateFromPromise = (promise, { loadingStatus, newUserLoadVersion}) => {
         promise.then(
             //
             // On promise accepted = zoo successfully loaded
@@ -54,7 +54,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
                     zoodb,
                     error: null,
                     _promise: null,
-                    loadVersion: newLoadVersion ?? state.loadVersion,
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion + 1,
                 }));
             },
@@ -68,7 +68,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
                     error,
                     zoodb: state.zoodb, // keep zoodb pointer to speed up reloads
                     _promise: null,
-                    loadVersion: newLoadVersion ?? state.loadVersion,
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion,
                 }));
             }
@@ -82,7 +82,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
             zoodb: state.zoodb,
             error: null,
             _promise: promise,
-            loadVersion: state.loadVersion,
+            userLoadVersion: state.userLoadVersion,
             internalLoadVersion: state.internalLoadVersion,
         }));
     };
@@ -99,7 +99,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
         doSetupLoadStateFromPromise(promise, 'loading');
     };
 
-    const doReload = (newLoadVersion) => {
+    const doReload = (newUserLoadVersion) => {
         debug(`Called doReload()`);
         if (zooDbLoadState.status === 'empty') {
             console.error(
@@ -119,20 +119,21 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
             // load again.
             console.log("*** Error in initial load, initiating initial load again ***");
             let promise = loadZooDb();
-            doSetupLoadStateFromPromise(promise, { loadingStatus: 'loading', newLoadVersion });
+            doSetupLoadStateFromPromise(promise, { loadingStatus: 'loading', newUserLoadVersion });
             return;
         }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
-        doSetupLoadStateFromPromise(promise, { loadingStatus: 'reloading', newLoadVersion });
+        doSetupLoadStateFromPromise(promise, { loadingStatus: 'reloading', newUserLoadVersion });
     };
 
     useEffect( () => {
         // debug(`useEffect function called`);
         if (zooDbLoadState.status === 'empty' && triggerInitialLoad) {
             doLoad();
-        } else if (loadVersion != null && loadVersion > zooDbLoadState.loadVersion) {
-            debug(`Detected loadVersion increase, reloading zoo`);
-            doReload(loadVersion);
+        } else if (zooDbLoadState.status !== 'loading' && zooDbLoadState.status !== 'reloading'
+                   && userLoadVersion != null && userLoadVersion > zooDbLoadState.userLoadVersion) {
+            debug(`Detected userLoadVersion increase, reloading zoo [parent component requested reload]`);
+            doReload(userLoadVersion);
         }
     } );
 
@@ -154,12 +155,13 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, loadVersion, trigg
         error: zooDbLoadState.error,
 
         //state: zooDbLoadState,
-        loadVersion: (zooDbLoadState.loadVersion << 32) | zooDbLoadState.internalLoadVersion,
+        loadVersion: (zooDbLoadState.userLoadVersion << 16) | zooDbLoadState.internalLoadVersion,
 
         // can be used as a second argument in useEffect() etc. to flag for
         // effects etc. that need to fire when the ZooDb load state and/or
         // contents change
-        getStateDependencies: () => [ zooDbLoadState.status, zooDbLoadState.loadversion ],
+        getStateDependencies:
+            () => [ zooDbLoadState.status, zooDbLoadState.userLoadVersion, zooDbLoadState.internalLoadVersion ],
 
         //
         // Remember not to call load() directly in a component body, but rather

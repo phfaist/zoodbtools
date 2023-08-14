@@ -348,8 +348,8 @@ $parcel$export($cdbe94ce1f253c89$exports, "useZooDbAccessState", () => $cdbe94ce
 
 
 const $cdbe94ce1f253c89$var$debug = (0, $b6z2V$debug)("zoodbtoolspreview.useZooDbAccessState");
-function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloadZooDb: reloadZooDb, loadVersion: loadVersion, triggerInitialLoad: triggerInitialLoad }) {
-    loadVersion ??= 0;
+function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloadZooDb: reloadZooDb, userLoadVersion: userLoadVersion, triggerInitialLoad: triggerInitialLoad }) {
+    userLoadVersion ??= 0;
     triggerInitialLoad ??= true;
     // debug(`useZooDbAccessState()`);
     const [zooDbLoadState, setZooDbLoadState] = (0, $b6z2V$useState)({
@@ -368,17 +368,17 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         // the promise that will resolve to a ZooDb instance object, if status
         // == 'loading' or status == 'reloading'
         _promise: null,
-        loadVersion: // a flag that we increase to ensure the state changes after the zoo is
+        userLoadVersion: // a flag that we increase to ensure the state changes after the zoo is
         // reloaded.  There are two flags, one controlling any externally
-        // requested reloads (loadVersion) and one controlling internally
+        // requested reloads (userLoadVersion) and one controlling internally
         // requested reloads.
-        loadVersion,
+        userLoadVersion,
         internalLoadVersion: 0
     });
     $cdbe94ce1f253c89$var$debug(`useZooDbAccessState() - `, zooDbLoadState, {
-        loadVersion: loadVersion
+        userLoadVersion: userLoadVersion
     });
-    const doSetupLoadStateFromPromise = (promise, { loadingStatus: loadingStatus, newLoadVersion: newLoadVersion })=>{
+    const doSetupLoadStateFromPromise = (promise, { loadingStatus: loadingStatus, newUserLoadVersion: newUserLoadVersion })=>{
         promise.then(//
         // On promise accepted = zoo successfully loaded
         //
@@ -390,7 +390,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                     zoodb: zoodb,
                     error: null,
                     _promise: null,
-                    loadVersion: newLoadVersion ?? state.loadVersion,
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion + 1
                 }));
         }, //
@@ -403,7 +403,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                     error: error,
                     zoodb: state.zoodb,
                     _promise: null,
-                    loadVersion: newLoadVersion ?? state.loadVersion,
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion
                 }));
         });
@@ -416,7 +416,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                 zoodb: state.zoodb,
                 error: null,
                 _promise: promise,
-                loadVersion: state.loadVersion,
+                userLoadVersion: state.userLoadVersion,
                 internalLoadVersion: state.internalLoadVersion
             }));
     };
@@ -429,7 +429,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         let promise = loadZooDb();
         doSetupLoadStateFromPromise(promise, "loading");
     };
-    const doReload = (newLoadVersion)=>{
+    const doReload = (newUserLoadVersion)=>{
         $cdbe94ce1f253c89$var$debug(`Called doReload()`);
         if (zooDbLoadState.status === "empty") {
             console.error(`useZooDbAccessState: Zoo must undergo initial load() before ` + `reload() can be called`);
@@ -446,22 +446,22 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             let promise = loadZooDb();
             doSetupLoadStateFromPromise(promise, {
                 loadingStatus: "loading",
-                newLoadVersion: newLoadVersion
+                newUserLoadVersion: newUserLoadVersion
             });
             return;
         }
         let promise = reloadZooDb(zooDbLoadState.zoodb);
         doSetupLoadStateFromPromise(promise, {
             loadingStatus: "reloading",
-            newLoadVersion: newLoadVersion
+            newUserLoadVersion: newUserLoadVersion
         });
     };
     (0, $b6z2V$useEffect)(()=>{
         // debug(`useEffect function called`);
         if (zooDbLoadState.status === "empty" && triggerInitialLoad) doLoad();
-        else if (loadVersion != null && loadVersion > zooDbLoadState.loadVersion) {
-            $cdbe94ce1f253c89$var$debug(`Detected loadVersion increase, reloading zoo`);
-            doReload(loadVersion);
+        else if (zooDbLoadState.status !== "loading" && zooDbLoadState.status !== "reloading" && userLoadVersion != null && userLoadVersion > zooDbLoadState.userLoadVersion) {
+            $cdbe94ce1f253c89$var$debug(`Detected userLoadVersion increase, reloading zoo [parent component requested reload]`);
+            doReload(userLoadVersion);
         }
     });
     // debug(`useZooDbAccessState(); called useEffect(); about to return accessor object ...`);
@@ -475,13 +475,14 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         zoodb: publicZooDb,
         error: zooDbLoadState.error,
         //state: zooDbLoadState,
-        loadVersion: zooDbLoadState.loadVersion << 32 | zooDbLoadState.internalLoadVersion,
+        loadVersion: zooDbLoadState.userLoadVersion << 16 | zooDbLoadState.internalLoadVersion,
         // can be used as a second argument in useEffect() etc. to flag for
         // effects etc. that need to fire when the ZooDb load state and/or
         // contents change
         getStateDependencies: ()=>[
                 zooDbLoadState.status,
-                zooDbLoadState.loadversion
+                zooDbLoadState.userLoadVersion,
+                zooDbLoadState.internalLoadVersion
             ],
         //
         // Remember not to call load() directly in a component body, but rather
@@ -505,7 +506,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     });
     let { loadZooDb: loadZooDb, reloadZooDb: reloadZooDb, renderObject: renderObject, initialObjectType: initialObjectType, initialObjectId: initialObjectId, getMathJax: getMathJax, commandButtonsUseReload: // incompleteSelectionRenderHtml,
     // CommandButtonsComponent,
-    commandButtonsUseReload, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, loadVersion: loadVersion } = props;
+    commandButtonsUseReload, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, userLoadVersion: userLoadVersion } = props;
     initialObjectType ||= "";
     initialObjectId ||= "";
     // React states and effects --
@@ -517,7 +518,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     const zooDbAccess = (0, $cdbe94ce1f253c89$export$f3662caf0be928f4)({
         loadZooDb: loadZooDb,
         reloadZooDb: reloadZooDb,
-        loadVersion: loadVersion
+        userLoadVersion: userLoadVersion
     });
     $55cc9c1ed9922b9a$var$debug(`got ZooDbAccess object: `, zooDbAccess);
     // render --
@@ -591,7 +592,8 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
                 getMathJax: getMathJax,
                 onLinkClick: onLinkClick
             }),
-            commandButtonsContents
+            commandButtonsContents,
+            props.children
         ]
     });
 }

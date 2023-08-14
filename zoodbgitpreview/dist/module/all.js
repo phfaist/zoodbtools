@@ -1,10 +1,10 @@
-import {jsxs as $lVGNU$jsxs, Fragment as $lVGNU$Fragment, jsx as $lVGNU$jsx} from "react/jsx-runtime";
+import {jsx as $lVGNU$jsx, jsxs as $lVGNU$jsxs} from "react/jsx-runtime";
+import $lVGNU$path from "path";
 import $lVGNU$debug from "debug";
 import $lVGNU$isomorphicgit from "isomorphic-git";
 import $lVGNU$isomorphicgithttpwebindexjs from "isomorphic-git/http/web/index.js";
 import {useState as $lVGNU$useState} from "react";
 import {ZooDbPreviewComponent as $lVGNU$ZooDbPreviewComponent} from "@phfaist/zoodbtools_preview";
-import $lVGNU$path from "path";
 import $lVGNU$stream from "stream";
 import {install as $lVGNU$install, configure as $lVGNU$configure, BFSRequire as $lVGNU$BFSRequire} from "browserfs";
 import $lVGNU$pify from "pify";
@@ -15,7 +15,7 @@ function $parcel$export(e, n, v, s) {
 var $533bbcd4d6a10b9b$exports = {};
 
 $parcel$export($533bbcd4d6a10b9b$exports, "ZooDbGithubRepoPreviewComponent", () => $533bbcd4d6a10b9b$export$e4e9bea81721a9e8);
-//import path from 'path';
+
 
 
 
@@ -85,32 +85,83 @@ const $533bbcd4d6a10b9b$var$debug = (0, $lVGNU$debug)("zoodbgitpreview.ZooDbGith
 window.git = (0, $lVGNU$isomorphicgit);
 window.gitHttp = (0, $lVGNU$isomorphicgithttpwebindexjs);
 function $533bbcd4d6a10b9b$export$e4e9bea81721a9e8(props) {
-    let { githubUser: githubUser, githubRepo: githubRepo, allowChoosePullRequest: allowChoosePullRequest, fs: fs, loadZooDbFromFsDir: loadZooDbFromFsDir, mainBranchName: mainBranchName, fsWorkDir: fsWorkDir, initialObjectType: initialObjectType, initialObjectId: initialObjectId, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, renderObject: renderObject, getMathJax: getMathJax } = props;
+    let { githubUser: githubUser, githubRepo: githubRepo, allowChoosePullRequest: allowChoosePullRequest, fs: fs, loadZooDbFromFsDir: loadZooDbFromFsDir, mainBranchName: mainBranchName, fsWorkDir: fsWorkDir, initialObjectType: initialObjectType, initialObjectId: initialObjectId, commandButtonsUseReload: commandButtonsUseReload, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, renderObject: renderObject, getMathJax: getMathJax } = props;
     allowChoosePullRequest ??= true;
     fsWorkDir ??= "/git-work";
     mainBranchName ??= "main";
-    let fsRepoDir = `${fsWorkDir}/${githubRepo}`;
+    let fsRepoDir = `${fsWorkDir}/${githubUser}-${githubRepo}`;
+    commandButtonsUseReload ??= false;
     const [gitBranch, setGitBranch] = (0, $lVGNU$useState)({
         branch: mainBranchName,
-        loadVersion: 0
+        userLoadVersion: 0
     });
-    const loadZooDb = async ()=>{
-        // Clear up any existing work dir folder
-        await fs.promises.rm(fsRepoDir, {
-            recursive: true
+    // to help with in-browser debugging
+    window.fsRepoDir = fsRepoDir;
+    window.githubUser = githubUser;
+    window.githubRepo = githubRepo;
+    const doGitCheckoutAppropriateVersion = async ()=>{
+        //
+        // fetch and checkout the relevant git branch in
+        //
+        let gitRemoteRef = mainBranchName;
+        //let gitRef = mainBranchName;
+        if (gitBranch.pullRequestNumber != null) gitRemoteRef = `pull/${gitBranch.pullRequestNumber}/head`;
+        $533bbcd4d6a10b9b$var$debug(`Calling git.fetch()`, {
+            gitRemoteRef: gitRemoteRef,
+            gitBranch: gitBranch
         });
-        $533bbcd4d6a10b9b$var$debug(`About to git clone...`);
-        await (0, $lVGNU$isomorphicgit).clone({
+        let fetchResult = await (0, $lVGNU$isomorphicgit).fetch({
             fs: fs,
             http: (0, $lVGNU$isomorphicgithttpwebindexjs),
             dir: fsRepoDir,
             corsProxy: "https://cors.isomorphic-git.org",
             url: `https://github.com/${githubUser}/${githubRepo}.git`,
-            ref: mainBranchName,
+            remoteRef: gitRemoteRef,
+            ref: gitRemoteRef,
             singleBranch: true,
             depth: 1
         });
-        $533bbcd4d6a10b9b$var$debug(`Cloned repository.  Folder ${fsRepoDir} now -> `, await fs.promises.readdir(`${fsRepoDir}`));
+        // and do 'git checkout' for the appropriate version
+        $533bbcd4d6a10b9b$var$debug(`Calling git.checkout() to checkout ${fetchResult.fetchHead} ` + `(${fetchResult.fetchHeadDescription})`);
+        await (0, $lVGNU$isomorphicgit).checkout({
+            fs: fs,
+            dir: fsRepoDir,
+            ref: fetchResult.fetchHead
+        });
+    };
+    const loadZooDb = async ()=>{
+        // see if we have our special marker in the folder
+        let needsClone = true;
+        const metaInfoFileName = (0, $lVGNU$path).join(fsRepoDir, "_zoodbgitpreview_git_repo.json");
+        try {
+            let data = await fs.promises.readFile(metaInfoFileName);
+            let d = JSON.parse(data);
+            if (d.githubUser === githubUser && d.githubRepo === githubRepo) needsClone = false;
+        } catch (err) {
+            $533bbcd4d6a10b9b$var$debug(`Couldn't read ${metaInfoFileName}, will do a fresh repository clone`);
+        }
+        if (needsClone) {
+            // Clear up any existing work dir folder
+            await fs.promises.rm(fsRepoDir, {
+                recursive: true
+            });
+            $533bbcd4d6a10b9b$var$debug(`About to git clone...`);
+            await (0, $lVGNU$isomorphicgit).clone({
+                fs: fs,
+                http: (0, $lVGNU$isomorphicgithttpwebindexjs),
+                dir: fsRepoDir,
+                corsProxy: "https://cors.isomorphic-git.org",
+                url: `https://github.com/${githubUser}/${githubRepo}.git`,
+                ref: mainBranchName,
+                singleBranch: true,
+                depth: 1
+            });
+            await fs.promises.writeFile(metaInfoFileName, JSON.stringify({
+                githubUser: githubUser,
+                githubRepo: githubRepo
+            }));
+            $533bbcd4d6a10b9b$var$debug(`Cloned repository.  Folder ${fsRepoDir} now -> `, await fs.promises.readdir(`${fsRepoDir}`));
+        } else await doGitCheckoutAppropriateVersion();
         let zoodb = await loadZooDbFromFsDir({
             fsRepoDir: fsRepoDir
         });
@@ -120,45 +171,7 @@ function $533bbcd4d6a10b9b$export$e4e9bea81721a9e8(props) {
     };
     const reloadZooDb = async (zoodb)=>{
         $533bbcd4d6a10b9b$var$debug(`Called reloadZooDb()`);
-        //
-        // fetch and checkout the relevant git branch in
-        //
-        let gitRemoteRef = mainBranchName;
-        let gitRef = mainBranchName;
-        if (gitBranch.pullRequestNumber != null) {
-            gitRemoteRef = `pull/${gitBranch.pullRequestNumber}/head`;
-            gitRef = `pr-${gitBranch.pullRequestNumber}`;
-        }
-        $533bbcd4d6a10b9b$var$debug(`Calling git.pull()`, {
-            gitRemoteRef: gitRemoteRef,
-            gitRef: gitRef,
-            gitBranch: gitBranch
-        });
-        await (0, $lVGNU$isomorphicgit).pull({
-            fs: fs,
-            http: (0, $lVGNU$isomorphicgithttpwebindexjs),
-            dir: fsRepoDir,
-            corsProxy: "https://cors.isomorphic-git.org",
-            url: `https://github.com/${githubUser}/${githubRepo}.git`,
-            remoteRef: gitRemoteRef,
-            ref: gitRef,
-            singleBranch: true,
-            depth: 1,
-            author: {
-                name: "git-preview-test",
-                email: "noemail@example.com"
-            }
-        });
-        $533bbcd4d6a10b9b$var$debug(`Calling git.checkout()`, {
-            gitRemoteRef: gitRemoteRef,
-            gitRef: gitRef
-        });
-        // and switch to this branch
-        await (0, $lVGNU$isomorphicgit).checkout({
-            fs: fs,
-            dir: fsRepoDir,
-            ref: gitRef
-        });
+        await doGitCheckoutAppropriateVersion();
         // now, initiate a zoo reload.
         $533bbcd4d6a10b9b$var$debug(`Reloading the zoo now`);
         await zoodb.load();
@@ -168,30 +181,26 @@ function $533bbcd4d6a10b9b$export$e4e9bea81721a9e8(props) {
     //
     // Render the component
     //
-    return /*#__PURE__*/ (0, $lVGNU$jsxs)((0, $lVGNU$Fragment), {
-        children: [
-            /*#__PURE__*/ (0, $lVGNU$jsx)((0, $965a280639223b0e$export$366f8f2ac96c0111), {
-                githubUser: githubUser,
-                githubRepo: githubRepo,
-                mainBranchName: mainBranchName,
-                allowChoosePullRequest: allowChoosePullRequest,
-                onGitBranchSelected: (newGitBranch)=>setGitBranch({
-                        ...newGitBranch,
-                        loadVersion: gitBranch.loadVersion + 1
-                    })
-            }),
-            /*#__PURE__*/ (0, $lVGNU$jsx)((0, $lVGNU$ZooDbPreviewComponent), {
-                loadZooDb: loadZooDb,
-                reloadZooDb: reloadZooDb,
-                renderObject: renderObject,
-                getMathJax: getMathJax,
-                initialObjectType: initialObjectType,
-                initialObjectId: initialObjectId,
-                commandButtonsUseReload: false,
-                commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback,
-                loadVersion: gitBranch.loadVersion
-            })
-        ]
+    return /*#__PURE__*/ (0, $lVGNU$jsx)((0, $lVGNU$ZooDbPreviewComponent), {
+        loadZooDb: loadZooDb,
+        reloadZooDb: reloadZooDb,
+        renderObject: renderObject,
+        getMathJax: getMathJax,
+        initialObjectType: initialObjectType,
+        initialObjectId: initialObjectId,
+        commandButtonsUseReload: commandButtonsUseReload,
+        commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback,
+        userLoadVersion: gitBranch.userLoadVersion,
+        children: /*#__PURE__*/ (0, $lVGNU$jsx)((0, $965a280639223b0e$export$366f8f2ac96c0111), {
+            githubUser: githubUser,
+            githubRepo: githubRepo,
+            mainBranchName: mainBranchName,
+            allowChoosePullRequest: allowChoosePullRequest,
+            onGitBranchSelected: (newGitBranch)=>setGitBranch({
+                    ...newGitBranch,
+                    userLoadVersion: gitBranch.userLoadVersion + 1
+                })
+        })
     });
 }
 

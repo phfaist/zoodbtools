@@ -8,18 +8,18 @@ import { createRoot } from 'react-dom/client';
 
 import {
     CitationSourceApiPlaceholder
-} from 'zoodbtools_preview/citationapiplaceholder';
+} from '@phfaist/zoodbtools_preview/citationapiplaceholder';
 
 import {
     ZooDbGithubRepoPreviewComponent
-} from 'zoodbtools_gitpreview';
+} from '@phfaist/zoodbtools_gitpreview';
 
 import {
     installFlmContentStyles, simpleRenderObjectWithFlm,
     installZooFlmEnvironmentLinksAndGraphicsHandlers,
-} from 'zoodbtools_preview';
+} from '@phfaist/zoodbtools_preview';
 
-import { setupBrowserFs, ZooDbGithubRepoPreviewComponent } from 'zoodbtools_gitpreview';
+import { setupBrowserFs, ZooDbGithubRepoPreviewComponent } from '@phfaist/zoodbtools_gitpreview';
 
 import loMerge from 'lodash/merge.js';
 
@@ -305,6 +305,7 @@ window.addEventListener('load', async () => {
             getMathJax={() => window.MathJax}
             initialObjectType={'person'}
             initialObjectId={'bob'}
+            commandButtonsUseReload={true}
             commandButtonsToggleDarkModeCallback={
                 () => { document.documentElement.classList.toggle('dark'); }
             }
