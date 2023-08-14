@@ -154,7 +154,7 @@ export function simpleRenderObjectWithFlm({
         let html = `<article class="object_render">`;
 
         html += sqzhtml`
-<h1>Object: ${html_escape(objectType)} <code>${html_escape(objectId)}</code></h1>
+<h1>${html_escape(objectType)} <code>${html_escape(objectId)}</code></h1>
 `;
 
         for (const {fieldname, fieldvalue, fieldschema}

@@ -100,7 +100,7 @@ function $d30e7bcdac759df9$export$22ae542d2b30e3c1({ zoodb: zoodb, objectType: o
         render_context.registerRenderPreviewCleanupCallback = registerRenderPreviewCleanupCallback;
         let html = `<article class="object_render">`;
         html += (0, $89tWE$sqzhtml)`
-<h1>Object: ${(0, $89tWE$escapehtml)(objectType)} <code>${(0, $89tWE$escapehtml)(objectId)}</code></h1>
+<h1>${(0, $89tWE$escapehtml)(objectType)} <code>${(0, $89tWE$escapehtml)(objectId)}</code></h1>
 `;
         for (const { fieldname: fieldname, fieldvalue: fieldvalue, fieldschema: fieldschema } of (0, $89tWE$iter_object_fields_recursive)(object, schema)){
             if (fieldvalue == null) continue;
