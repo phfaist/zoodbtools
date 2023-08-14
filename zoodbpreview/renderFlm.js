@@ -53,8 +53,15 @@ export function installZooFlmEnvironmentLinksAndGraphicsHandlers(
                 resolvedSourcePath,
                 { graphics_resource, render_context, source_path }
             );
-            let mimeType = mime.lookup(resolvedSourcePath);
-            if (!mimeType) { mimeType = 'image/*'; }
+            let mimeType = null;
+            if (resolvedSourcePath.endsWith('.svg')) {
+                // make sure this mime type is correct!
+                mimeType = 'image/svg+xml';
+            } else if (!mimeType) {
+                mimeType = mime.lookup(resolvedSourcePath);
+            } else if (!mimeType) {
+                mimeType = 'image/*';
+            }
             const blob = new Blob([ imageData ], { type: mimeType });
 
             const src_url = URL.createObjectURL(blob);
