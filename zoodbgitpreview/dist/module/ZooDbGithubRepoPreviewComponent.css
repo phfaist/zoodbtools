@@ -1,0 +1,26 @@
+.GithubRepoSelector {
+  display: flex;
+}
+
+.GithubRepoSelector .show-gh-user, .GithubRepoSelector .show-gh-repo, .GithubRepoSelector .show-gh-branch {
+  font-family: monospace;
+}
+
+.GithubRepoSelector .show-gh-pick, .GithubRepoSelector .show-gh-repo-combo {
+  border: .4pt solid #7f7f7f80;
+  border-radius: 3px;
+  margin: 2px 8px 2px 2px;
+  padding: 3px 5px;
+  display: block;
+}
+
+.ZooDbPreviewComponent {
+  grid-template-columns: 1fr 0fr 0fr 0fr;
+}
+
+.ZooDbPreviewComponent .GithubRepoSelector {
+  grid-area: 4 / 1 / 5 / 3;
+  overflow: auto;
+}
+
+/*# sourceMappingURL=ZooDbGithubRepoPreviewComponent.css.map */
