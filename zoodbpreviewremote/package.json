@@ -1,5 +1,5 @@
 {
-  "name": "zoodbtools_previewremote",
+  "name": "@phfaist/zoodbtools_previewremote",
   "version": "0.1.0",
   "type": "module",
   "dependencies": {

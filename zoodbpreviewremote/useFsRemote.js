@@ -1,23 +1,22 @@
-import nodeUtil from 'node:util';
+//import nodeUtil from 'node:util';
+//const promisify = nodeUtil.promisify;
 
 import fsRemote_createClient from 'fs-remote/createClient';
 
-
-// const promisify = (fn) => {
-//     return function() {
-//         var args = arguments;
-//         return new Promise( (resolve, reject) => {
-//             fn(...args,
-//                (err, ...results) => {
-//                    if (err != null) {
-//                        reject(err)
-//                    } else {
-//                        resolve(...results);
-//                    }
-//                });
-//         } );
-//     };
-// };
+const promisify = (fn) => {
+    return function(...args) {
+        return new Promise( (resolve, reject) => {
+            fn(...args,
+               (err, ...results) => {
+                   if (err != null) {
+                       reject(err)
+                   } else {
+                       resolve(...results);
+                   }
+               });
+        } );
+    };
+};
 
 
 
@@ -34,7 +33,7 @@ export function fsRemoteCreateClient(remoteUrl)
 
     fs.promises = {};
     for (const method of ['access','appendFile','chmod','chown','close', 'copyFile','exists','fchmod','fchown','fdatasync','fstat','fsync','ftruncate','futimes','lchmod','lchown','link','lstat','mkdir','mkdtemp','open','read','readFile','readdir','readlink','realpath','rename','rmdir','stat','symlink','truncate','unlink','utimes','write','writeFile',]) {
-        fs.promises[method] = nodeUtil.promisify(fs[method]);
+        fs.promises[method] = promisify(fs[method]);
     }
 
     return fs;

@@ -28,6 +28,7 @@ export function ZooDbPreviewComponent(props)
         // CommandButtonsComponent,
         commandButtonsUseReload,
         commandButtonsToggleDarkModeCallback,
+        loadVersion,
     } = props;
 
     initialObjectType ||= "";
@@ -46,6 +47,7 @@ export function ZooDbPreviewComponent(props)
 
     const zooDbAccess = useZooDbAccessState({
         loadZooDb, reloadZooDb,
+        loadVersion, // used to trigger reloads externally through our props
         //triggerInitialLoad: true, // this is the default
     });
 

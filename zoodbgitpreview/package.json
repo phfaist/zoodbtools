@@ -1,31 +1,32 @@
 {
-    "name": "@phfaist/zoodbtools_preview",
+    "name": "@phfaist/zoodbtools_gitpreview",
     "version": "0.1.0",
     "type": "module",
     "main": "./dist/module/all.js",
     "targets": {
         "module": {
             "source": [
-                "all.js",
-                "useZooDbAccessState.js",
-                "citationapiplaceholder.js",
-                "renderFlm.js"
+                "ZooDbGithubRepoPreviewComponent.jsx",
+                "all.js"
             ]
         }
     },
     "dependencies": {
+        "browserfs": "^1.4.3",
         "debug": "^4.3.4",
         "escape-html": "^1.0.3",
+        "isomorphic-git": "beta",
         "mime-types": "^2.1.35",
+        "pify": "^6.1.0",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-select": "^5.7.4"
+        "react-dom": "^18.2.0"
     },
     "devDependencies": {
         "parcel": "^2.9.3"
     },
     "peerDependencies": {
-        "@phfaist/zoodb": "*"
+        "@phfaist/zoodb": "*",
+        "@phfaist/zoodbtools_preview": "*"
     },
     "scripts": {
         "build": "parcel build"

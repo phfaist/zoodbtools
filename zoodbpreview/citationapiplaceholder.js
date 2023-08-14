@@ -8,7 +8,7 @@ export class CitationSourceApiPlaceholder extends CitationSourceBase
         options ||= {};
 
         const override_options = {
-            source_name: `${options.title} (placeholder)`,
+            source_name: `${options.placeholder_name} (placeholder)`,
             chunk_size: Infinity,
             chunk_retrieve_delay_ms: 0,
 

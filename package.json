@@ -1,11 +1,12 @@
 {
-  "name": "zoodbtools",
+  "name": "@phfaist/zoodbtools",
   "packageManager": "yarn@3.3.0",
   "private": true,
   "workspaces": [
     "zoodbeditobject",
     "zoodbpreview",
     "zoodbpreviewremote",
+    "zoodbgitpreview",
     "playground_preview"
   ],
   "devDependencies": {
@@ -28,6 +29,9 @@
   "alias": {
     "node-fetch": {
       "global": "fetch"
+    },
+    "global": {
+      "global": "window.globalThis"
     }
   }
 }

@@ -5,7 +5,7 @@ class $101c10e2432771ff$export$143e0941d05399df extends (0, $9Gy6l$CitationSourc
     constructor(options){
         options ||= {};
         const override_options = {
-            source_name: `${options.title} (placeholder)`,
+            source_name: `${options.placeholder_name} (placeholder)`,
             chunk_size: Infinity,
             chunk_retrieve_delay_ms: 0,
             cache_store_options: {

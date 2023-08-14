@@ -1,11 +1,11 @@
 import $89tWE$debug from "debug";
+import $89tWE$escapehtml from "escape-html";
 import {html_fragmentrenderer_get_style_information as $89tWE$html_fragmentrenderer_get_style_information, ZooHtmlFragmentRenderer as $89tWE$ZooHtmlFragmentRenderer, make_render_shorthands as $89tWE$make_render_shorthands, make_and_render_document as $89tWE$make_and_render_document} from "@phfaist/zoodb/zooflm";
 import "@phfaist/zoodb/util/getfield";
 import {iter_object_fields_recursive as $89tWE$iter_object_fields_recursive} from "@phfaist/zoodb/util/objectinspector";
 import {sqzhtml as $89tWE$sqzhtml} from "@phfaist/zoodb/util/sqzhtml";
 import {split_prefix_label as $89tWE$split_prefix_label} from "@phfaist/zoodb/util/prefixlabel";
 import $89tWE$mimetypes from "mime-types";
-import $89tWE$escapehtml from "escape-html";
 
 
 

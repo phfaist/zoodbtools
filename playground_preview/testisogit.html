@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script type="module">
+import LightningFS from "@isomorphic-git/lightning-fs"; // import "https://unpkg.com/@isomorphic-git/lightning-fs";
+import git from "isomorphic-git"; // import "https://unpkg.com/isomorphic-git@beta";
+import gitHttp from 'isomorphic-git/http/web/index.js' // 'https://unpkg.com/isomorphic-git@beta/http/web/index.js'
+import path from 'path';
+
+// Initialize isomorphic-git with a file system
+window.fs = new LightningFS('my-test-iso-git-fs-2');
+
+// rm -rf ...  thanks https://stackoverflow.com/a/32197381/1694896
+async function deleteFolderRecursive(directoryPath, fs)
+{
+    //console.log('deleteFolderRecursive', { directoryPath, fs });
+    let fsp = fs.promises;
+    let fileExists = false;
+    let fileStat = null;
+    try {
+        fileStat = await fsp.lstat(directoryPath);
+        fileExists = true;
+    } catch (e) { console.log('path', directoryPath, 'does not seem to exist', e); }
+    if (fileExists) {
+        const dirEntries = await fsp.readdir(directoryPath);
+        for (const file of dirEntries) {
+            const curPath = path.join(directoryPath, file);
+            const curStat = await fsp.lstat(curPath);
+            if (curStat.isDirectory()) {
+                // recurse
+                await deleteFolderRecursive(curPath, fs);
+            } else {
+                // delete file
+                await fsp.unlink(curPath);
+            }
+        }
+        //console.log(`Recursively cleaned out ${directoryPath}, entries are now: `,
+        //            await fsp.readdir(directoryPath));
+        await fsp.rmdir(directoryPath);
+    }
+};
+
+
+async function run () {
+    let myDir = '/my-dir4';
+    let fs = window.fs;
+
+    await deleteFolderRecursive(myDir, fs);
+
+    console.log(`Current files in /: `, await fs.promises.readdir('/'));
+
+    await fs.promises.mkdir(myDir, { recursive: true });
+
+    await git.clone({
+        fs,
+        http: gitHttp,
+        dir: myDir,
+        corsProxy: 'https://cors.isomorphic-git.org',
+        url: 'https://github.com/phfaist/zoodb-example.git',
+        ref: 'main',
+        singleBranch: true,
+        depth: 10
+    });
+
+    // Now it should not be empty...
+    const result = await fs.promises.readdir(myDir);
+
+    document.getElementById('AppContainer').innerText = JSON.stringify(result, null, 4);
+};
+
+window.addEventListener('load', run);
+</script>
+
+  </head>
+  <body>
+    <div id="AppContainer"></div>
+
+  </body>
+</html>
