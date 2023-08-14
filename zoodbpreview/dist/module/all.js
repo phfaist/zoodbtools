@@ -117,11 +117,14 @@ function $e81314a651474654$export$3876c21e2ad479cc({ renderContent: renderConten
                 if (getMathJax) {
                     const MJ = getMathJax();
                     if (MJ) {
+                        await MJ.typesetClear([
+                            domNode
+                        ]);
+                        await MJ.texReset?.();
                         await MJ.typesetPromise([
                             domNode
                         ]);
                         offloadCallbackFnList.push(()=>{
-                            MJ.texReset?.();
                             MJ.typesetClear([
                                 domNode
                             ]);

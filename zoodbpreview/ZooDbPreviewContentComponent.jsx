@@ -140,10 +140,11 @@ export function useLoadPreviewContentEffect({
                     if (getMathJax) {
                         const MJ = getMathJax();
                         if (MJ) {
+                            await MJ.typesetClear([domNode]);
+                            await MJ.texReset?.();
                             await MJ.typesetPromise([domNode]);
                             offloadCallbackFnList.push(
                                 () => {
-                                    MJ.texReset?.();
                                     MJ.typesetClear([domNode]);
                                 }
                             );
