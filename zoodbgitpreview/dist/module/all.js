@@ -39,12 +39,14 @@ function $965a280639223b0e$export$366f8f2ac96c0111(props) {
         if (prText != null && prText != "") {
             // we seem to have selected a PR
             let pullRequestNumber = parseInt(prText);
-            $965a280639223b0e$var$debug("pr selected!", {
-                pullRequestNumber: pullRequestNumber
-            });
-            onGitBranchSelected({
-                pullRequestNumber: pullRequestNumber
-            });
+            if (typeof pullRequestNumber === "number" && pullRequestNumber > 0) {
+                $965a280639223b0e$var$debug("pr selected!", {
+                    pullRequestNumber: pullRequestNumber
+                });
+                onGitBranchSelected({
+                    pullRequestNumber: pullRequestNumber
+                });
+            } else alert(`Please enter a pull request number to view`);
         } else alert(`Please enter a pull request number to view`);
     };
     const btnMainClicked = (event)=>{

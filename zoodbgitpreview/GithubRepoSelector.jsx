@@ -29,8 +29,12 @@ export function GithubRepoSelector(props)
         if (prText != null && prText != "") {
             // we seem to have selected a PR
             let pullRequestNumber = parseInt(prText);
-            debug('pr selected!', { pullRequestNumber });
-            onGitBranchSelected({ pullRequestNumber, });
+            if (typeof pullRequestNumber === 'number' && pullRequestNumber > 0) {
+                debug('pr selected!', { pullRequestNumber });
+                onGitBranchSelected({ pullRequestNumber, });
+            } else {
+                alert(`Please enter a pull request number to view`);
+            }
         } else {
             alert(`Please enter a pull request number to view`);
         }

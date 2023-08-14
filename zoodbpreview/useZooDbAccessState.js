@@ -73,7 +73,10 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, t
                     error,
                     zoodb: state.zoodb, // keep zoodb pointer to speed up reloads
                     _promise: null,
-                    userLoadVersion: state.userLoadVersion,
+                    // set new userLoadVersion even if the load has an error, because
+                    // otherwise we want to continuously reload because it looks like the
+                    // state has changed after the load-error.
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion,
                 }));
             }

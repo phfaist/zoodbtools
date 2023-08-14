@@ -62,7 +62,10 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                     error: error,
                     zoodb: state.zoodb,
                     _promise: null,
-                    userLoadVersion: state.userLoadVersion,
+                    // set new userLoadVersion even if the load has an error, because
+                    // otherwise we want to continuously reload because it looks like the
+                    // state has changed after the load-error.
+                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion
                 }));
         });
