@@ -41,7 +41,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, t
 
     debug(`useZooDbAccessState() - `, zooDbLoadState, { userLoadVersion });
 
-    const doSetupLoadStateFromPromise = (promise, { loadingStatus, newUserLoadVersion}) => {
+    const doSetupLoadStateFromPromise = (promise, { loadingStatus, newUserLoadVersion }) => {
         promise.then(
             //
             // On promise accepted = zoo successfully loaded
@@ -49,14 +49,19 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, t
             (zoodb) => {
                 // once the zoodb is loaded, we set the state to 'loaded' and
                 // set the instance properly.
-                setZooDbLoadState(state => ({
-                    status: 'loaded',
-                    zoodb,
-                    error: null,
-                    _promise: null,
-                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
-                    internalLoadVersion: state.internalLoadVersion + 1,
-                }));
+                setZooDbLoadState(state => {
+                    let newInternalLoadVersion = (
+                        (newUserLoadVersion != null) ? state.internalLoadVersion : (state.internalLoadVersion + 1)
+                    );
+                    return {
+                        status: 'loaded',
+                        zoodb,
+                        error: null,
+                        _promise: null,
+                        userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
+                        internalLoadVersion: newInternalLoadVersion,
+                    };
+                });
             },
             //
             // On promise rejected = error loading the zoo
@@ -68,7 +73,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, t
                     error,
                     zoodb: state.zoodb, // keep zoodb pointer to speed up reloads
                     _promise: null,
-                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
+                    userLoadVersion: state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion,
                 }));
             }
@@ -96,7 +101,7 @@ export function useZooDbAccessState({ loadZooDb, reloadZooDb, userLoadVersion, t
             return;
         }
         let promise = loadZooDb();
-        doSetupLoadStateFromPromise(promise, 'loading');
+        doSetupLoadStateFromPromise(promise, { loadingStatus: 'loading' });
     };
 
     const doReload = (newUserLoadVersion) => {

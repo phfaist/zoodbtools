@@ -21,6 +21,9 @@ import {
 
 import { setupBrowserFs, ZooDbGithubRepoPreviewComponent } from '@phfaist/zoodbtools_gitpreview';
 
+import { timeout } from '@phfaist/zoodb/util/prify';
+
+
 import loMerge from 'lodash/merge.js';
 
 
@@ -241,6 +244,12 @@ window.addEventListener('load', async () => {
         //
 
         debug(`Initiating zoo load...`);
+
+        // await timeout(250); // pause 250ms to give the time to the user interface maybe to refresh, etc.
+        // for (const count_j of [0,1,2,3,4,5,6,7,8,9]) {
+        //     debug(`PAUSING! `, { count_j });
+        //     await timeout(1000);
+        // }
 
         let zoodbOpts = {
 

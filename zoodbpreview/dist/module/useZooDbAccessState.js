@@ -41,14 +41,17 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         (zoodb)=>{
             // once the zoodb is loaded, we set the state to 'loaded' and
             // set the instance properly.
-            setZooDbLoadState((state)=>({
+            setZooDbLoadState((state)=>{
+                let newInternalLoadVersion = newUserLoadVersion != null ? state.internalLoadVersion : state.internalLoadVersion + 1;
+                return {
                     status: "loaded",
                     zoodb: zoodb,
                     error: null,
                     _promise: null,
                     userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
-                    internalLoadVersion: state.internalLoadVersion + 1
-                }));
+                    internalLoadVersion: newInternalLoadVersion
+                };
+            });
         }, //
         // On promise rejected = error loading the zoo
         //
@@ -59,7 +62,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                     error: error,
                     zoodb: state.zoodb,
                     _promise: null,
-                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
+                    userLoadVersion: state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion
                 }));
         });
@@ -83,7 +86,9 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             return;
         }
         let promise = loadZooDb();
-        doSetupLoadStateFromPromise(promise, "loading");
+        doSetupLoadStateFromPromise(promise, {
+            loadingStatus: "loading"
+        });
     };
     const doReload = (newUserLoadVersion)=>{
         $cdbe94ce1f253c89$var$debug(`Called doReload()`);

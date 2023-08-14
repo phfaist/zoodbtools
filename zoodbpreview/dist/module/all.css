@@ -111,7 +111,7 @@
   height: 100%;
   border: 0;
   grid-template-rows: max-content 1fr;
-  grid-template-columns: 1fr 0fr;
+  grid-template-columns: 1fr 0fr 0fr;
   padding: 0;
   display: grid;
 }

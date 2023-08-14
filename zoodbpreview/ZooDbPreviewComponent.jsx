@@ -123,6 +123,8 @@ export function ZooDbPreviewComponent(props)
         );
     };
 
+    debug(`ZooDbPreviewComponent, render`, { zooDbAccess, selectedObjectTypeAndId });
+
     return (
         <div className="ZooDbPreviewComponent">
             <ZooDbSelectObjectTypeAndIdComponent

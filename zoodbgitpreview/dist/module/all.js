@@ -1,3 +1,4 @@
+import "./ZooDbGithubRepoPreviewComponent.css";
 import {jsx as $lVGNU$jsx, jsxs as $lVGNU$jsxs} from "react/jsx-runtime";
 import $lVGNU$path from "path";
 import $lVGNU$debug from "debug";
@@ -25,10 +26,14 @@ $parcel$export($533bbcd4d6a10b9b$exports, "ZooDbGithubRepoPreviewComponent", () 
 
 
 
+
 const $965a280639223b0e$var$debug = (0, $lVGNU$debug)("zoodbgitpreview.GithubRepoSelector");
 function $965a280639223b0e$export$366f8f2ac96c0111(props) {
-    const { githubUser: githubUser, githubRepo: githubRepo, mainBranchName: mainBranchName, onGitBranchSelected: onGitBranchSelected } = props;
+    const { githubUser: githubUser, githubRepo: githubRepo, mainBranchName: mainBranchName, gitBranch: gitBranch, onGitBranchSelected: onGitBranchSelected } = props;
     $965a280639223b0e$var$debug("rendering github repo selector");
+    let showBranchText = "??";
+    if (gitBranch.branch) showBranchText = gitBranch.branch;
+    else if (gitBranch.pullRequestNumber) showBranchText = `PR #${gitBranch.pullRequestNumber}`;
     const btnClicked = (event)=>{
         const prText = document.getElementById("show-gh-select-input-pull-request").value;
         if (prText != null && prText != "") {
@@ -50,35 +55,54 @@ function $965a280639223b0e$export$366f8f2ac96c0111(props) {
     return /*#__PURE__*/ (0, $lVGNU$jsxs)("div", {
         className: "GithubRepoSelector",
         children: [
+            /*#__PURE__*/ (0, $lVGNU$jsxs)("span", {
+                className: "show-gh-repo-combo",
+                children: [
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("span", {
+                        className: "show-gh-user",
+                        children: githubUser
+                    }),
+                    ":",
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("span", {
+                        className: "show-gh-repo",
+                        children: githubRepo
+                    }),
+                    " [",
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("span", {
+                        className: "show-gh-branch",
+                        children: showBranchText
+                    }),
+                    "]"
+                ]
+            }),
+            /*#__PURE__*/ (0, $lVGNU$jsxs)("span", {
+                className: "show-gh-pick show-gh-pick-pr",
+                children: [
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("label", {
+                        htmlFor: "show-gh-select-input-pull-request",
+                        children: "View Pull Request #:"
+                    }),
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("input", {
+                        type: "text",
+                        id: "show-gh-select-input-pull-request"
+                    }),
+                    /*#__PURE__*/ (0, $lVGNU$jsx)("button", {
+                        onClick: btnClicked,
+                        children: "Go to PR!"
+                    })
+                ]
+            }),
             /*#__PURE__*/ (0, $lVGNU$jsx)("span", {
-                className: "show-gh-user",
-                children: githubUser
-            }),
-            ":",
-            /*#__PURE__*/ (0, $lVGNU$jsx)("span", {
-                className: "show-gh-repo",
-                children: githubRepo
-            }),
-            /*#__PURE__*/ (0, $lVGNU$jsx)("label", {
-                htmlFor: "show-gh-select-input-pull-request",
-                children: "Pull Request #:"
-            }),
-            /*#__PURE__*/ (0, $lVGNU$jsx)("input", {
-                type: "text",
-                size: "10",
-                id: "show-gh-select-input-pull-request"
-            }),
-            /*#__PURE__*/ (0, $lVGNU$jsx)("button", {
-                onClick: btnClicked,
-                children: "Go to PR!"
-            }),
-            /*#__PURE__*/ (0, $lVGNU$jsx)("button", {
-                onClick: btnMainClicked,
-                children: "Go to main branch"
+                className: "show-gh-pick show-gh-pick-main-branch",
+                children: /*#__PURE__*/ (0, $lVGNU$jsx)("button", {
+                    onClick: btnMainClicked,
+                    children: "Go to main branch"
+                })
             })
         ]
     });
 }
+
 
 
 const $533bbcd4d6a10b9b$var$debug = (0, $lVGNU$debug)("zoodbgitpreview.ZooDbGithubRepoPreviewComponent");
@@ -194,6 +218,7 @@ function $533bbcd4d6a10b9b$export$e4e9bea81721a9e8(props) {
         children: /*#__PURE__*/ (0, $lVGNU$jsx)((0, $965a280639223b0e$export$366f8f2ac96c0111), {
             githubUser: githubUser,
             githubRepo: githubRepo,
+            gitBranch: gitBranch,
             mainBranchName: mainBranchName,
             allowChoosePullRequest: allowChoosePullRequest,
             onGitBranchSelected: (newGitBranch)=>setGitBranch({

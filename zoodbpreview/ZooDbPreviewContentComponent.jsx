@@ -293,6 +293,8 @@ export function ZooDbPreviewContentComponent(props)
         );
     }
 
+    debug(`ZooDbPreviewContentComponent, render`, { zooDbAccess });
+
     return (
         <>
             <div className="zoodb-preview-messages">{ previewMessages }</div>

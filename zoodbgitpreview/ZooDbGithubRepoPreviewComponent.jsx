@@ -13,6 +13,8 @@ import { ZooDbPreviewComponent } from '@phfaist/zoodbtools_preview';
 
 import { GithubRepoSelector } from './GithubRepoSelector.jsx';
 
+import './ZooDbGithubRepoPreviewComponent_style.scss';
+
 
 window.git = git;
 window.gitHttp = gitHttp;
@@ -186,6 +188,7 @@ export function ZooDbGithubRepoPreviewComponent(props)
             <GithubRepoSelector
                 githubUser={githubUser}
                 githubRepo={githubRepo}
+                gitBranch={gitBranch}
                 mainBranchName={mainBranchName}
                 allowChoosePullRequest={allowChoosePullRequest}
                 onGitBranchSelected={

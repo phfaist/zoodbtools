@@ -1,0 +1,14 @@
+.ZooDbPreviewComponent {
+
+    grid-template-columns: 1fr 0fr 0fr 0fr;
+
+    .GithubRepoSelector {
+
+        overflow: auto;
+
+        grid-row-start: 4;
+        grid-row-end: 5;
+        grid-column-start: 1;
+        grid-column-end: 3;
+    }
+}

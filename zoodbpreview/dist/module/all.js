@@ -253,6 +253,9 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
             ]
         });
     }
+    $e81314a651474654$var$debug(`ZooDbPreviewContentComponent, render`, {
+        zooDbAccess: zooDbAccess
+    });
     return /*#__PURE__*/ (0, $b6z2V$jsxs)((0, $b6z2V$Fragment), {
         children: [
             /*#__PURE__*/ (0, $b6z2V$jsx)("div", {
@@ -385,14 +388,17 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
         (zoodb)=>{
             // once the zoodb is loaded, we set the state to 'loaded' and
             // set the instance properly.
-            setZooDbLoadState((state)=>({
+            setZooDbLoadState((state)=>{
+                let newInternalLoadVersion = newUserLoadVersion != null ? state.internalLoadVersion : state.internalLoadVersion + 1;
+                return {
                     status: "loaded",
                     zoodb: zoodb,
                     error: null,
                     _promise: null,
                     userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
-                    internalLoadVersion: state.internalLoadVersion + 1
-                }));
+                    internalLoadVersion: newInternalLoadVersion
+                };
+            });
         }, //
         // On promise rejected = error loading the zoo
         //
@@ -403,7 +409,7 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
                     error: error,
                     zoodb: state.zoodb,
                     _promise: null,
-                    userLoadVersion: newUserLoadVersion ?? state.userLoadVersion,
+                    userLoadVersion: state.userLoadVersion,
                     internalLoadVersion: state.internalLoadVersion
                 }));
         });
@@ -427,7 +433,9 @@ function $cdbe94ce1f253c89$export$f3662caf0be928f4({ loadZooDb: loadZooDb, reloa
             return;
         }
         let promise = loadZooDb();
-        doSetupLoadStateFromPromise(promise, "loading");
+        doSetupLoadStateFromPromise(promise, {
+            loadingStatus: "loading"
+        });
     };
     const doReload = (newUserLoadVersion)=>{
         $cdbe94ce1f253c89$var$debug(`Called doReload()`);
@@ -571,6 +579,10 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     if (commandButtonsContents.length > 0) commandButtonsContents = /*#__PURE__*/ (0, $b6z2V$jsx)("div", {
         className: "zoodb-preview-command-buttons",
         children: commandButtonsContents
+    });
+    $55cc9c1ed9922b9a$var$debug(`ZooDbPreviewComponent, render`, {
+        zooDbAccess: zooDbAccess,
+        selectedObjectTypeAndId: selectedObjectTypeAndId
     });
     return /*#__PURE__*/ (0, $b6z2V$jsxs)("div", {
         className: "ZooDbPreviewComponent",
