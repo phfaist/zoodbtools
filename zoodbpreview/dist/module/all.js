@@ -116,9 +116,14 @@ function $e81314a651474654$export$3876c21e2ad479cc({ renderContent: renderConten
                 //
                 if (getMathJax) {
                     const MJ = getMathJax();
-                    if (MJ) await MJ.typesetPromise([
-                        domNode
-                    ]);
+                    if (MJ) {
+                        await MJ.typesetPromise([
+                            domNode
+                        ]);
+                        offloadCallbackFnList.push(()=>MJ.typesetClear([
+                                domNode
+                            ]));
+                    }
                 }
             }
             if (cancelFlag) {

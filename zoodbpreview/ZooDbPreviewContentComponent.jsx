@@ -141,6 +141,9 @@ export function useLoadPreviewContentEffect({
                         const MJ = getMathJax();
                         if (MJ) {
                             await MJ.typesetPromise([domNode]);
+                            offloadCallbackFnList.push(
+                                () => MJ.typesetClear([domNode])
+                            );
                         }
                     }
                 }
