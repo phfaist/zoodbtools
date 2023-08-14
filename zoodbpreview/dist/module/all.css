@@ -49,12 +49,12 @@
 .zoodb-preview-messages pre, .zoodb-preview-content pre {
   white-space: pre-wrap;
   font-size: 1rem;
-  line-height: 1.05em;
+  line-height: 1.3em;
 }
 
 .zoodb-preview-messages pre.small-caption, .zoodb-preview-content pre.small-caption {
   font-size: .9rem;
-  line-height: 1.05em;
+  line-height: 1.3em;
 }
 
 .zoodb-preview-select-bar {
