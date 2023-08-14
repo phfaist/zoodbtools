@@ -57,9 +57,11 @@ export function installZooFlmEnvironmentLinksAndGraphicsHandlers(
             if (resolvedSourcePath.endsWith('.svg')) {
                 // make sure this mime type is correct!
                 mimeType = 'image/svg+xml';
-            } else if (!mimeType) {
+            }
+            if (!mimeType) {
                 mimeType = mime.lookup(resolvedSourcePath);
-            } else if (!mimeType) {
+            }
+            if (!mimeType) {
                 mimeType = 'image/*';
             }
             const blob = new Blob([ imageData ], { type: mimeType });

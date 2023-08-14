@@ -705,8 +705,8 @@ function $d30e7bcdac759df9$export$73d82f0ed63f6ba5(zoo_flm_environment, { getGra
         let mimeType = null;
         if (resolvedSourcePath.endsWith(".svg")) // make sure this mime type is correct!
         mimeType = "image/svg+xml";
-        else if (!mimeType) mimeType = (0, $b6z2V$mimetypes).lookup(resolvedSourcePath);
-        else if (!mimeType) mimeType = "image/*";
+        if (!mimeType) mimeType = (0, $b6z2V$mimetypes).lookup(resolvedSourcePath);
+        if (!mimeType) mimeType = "image/*";
         const blob = new Blob([
             imageData
         ], {
