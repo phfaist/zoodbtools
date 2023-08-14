@@ -142,7 +142,10 @@ export function useLoadPreviewContentEffect({
                         if (MJ) {
                             await MJ.typesetPromise([domNode]);
                             offloadCallbackFnList.push(
-                                () => MJ.typesetClear([domNode])
+                                () => {
+                                    MJ.texReset?.();
+                                    MJ.typesetClear([domNode]);
+                                }
                             );
                         }
                     }
