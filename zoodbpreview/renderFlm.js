@@ -47,19 +47,19 @@ export function installZooFlmEnvironmentLinksAndGraphicsHandlers(
     zoo_flm_environment.graphics_collection.src_url_resolver_fn =
         ({graphics_resource, render_context, source_path}) => {
 
+            const resolvedSourcePath = graphics_resource.source_info.resolved_source;
+
             const imageData = getGraphicsFileContents(
-                graphics_resource.source_info.resolved_source,
+                resolvedSourcePath,
                 { graphics_resource, render_context, source_path }
             );
-            let mimeType = mime.lookup(
-                graphics_resource.source_info.resolved_source
-            );
+            let mimeType = mime.lookup(resolvedSourcePath);
             if (!mimeType) { mimeType = 'image/*'; }
             const blob = new Blob([ imageData ], { type: mimeType });
 
             const src_url = URL.createObjectURL(blob);
 
-            debug(`created Blob Object Url ${src_url} with mime type ${mimeType}`, imageData);
+            debug(`created Blob Object Url ${src_url} for ${resolvedSourcePath} with mime type ${mimeType}`);
 
             if (render_context.registerRenderPreviewCleanupCallback != null) {
                 render_context.registerRenderPreviewCleanupCallback(

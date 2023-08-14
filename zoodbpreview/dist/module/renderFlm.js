@@ -32,12 +32,13 @@ ${styinfo.css_content}
 }
 function $d30e7bcdac759df9$export$73d82f0ed63f6ba5(zoo_flm_environment, { getGraphicsFileContents: getGraphicsFileContents }) {
     zoo_flm_environment.graphics_collection.src_url_resolver_fn = ({ graphics_resource: graphics_resource, render_context: render_context, source_path: source_path })=>{
-        const imageData = getGraphicsFileContents(graphics_resource.source_info.resolved_source, {
+        const resolvedSourcePath = graphics_resource.source_info.resolved_source;
+        const imageData = getGraphicsFileContents(resolvedSourcePath, {
             graphics_resource: graphics_resource,
             render_context: render_context,
             source_path: source_path
         });
-        let mimeType = (0, $89tWE$mimetypes).lookup(graphics_resource.source_info.resolved_source);
+        let mimeType = (0, $89tWE$mimetypes).lookup(resolvedSourcePath);
         if (!mimeType) mimeType = "image/*";
         const blob = new Blob([
             imageData
@@ -45,7 +46,7 @@ function $d30e7bcdac759df9$export$73d82f0ed63f6ba5(zoo_flm_environment, { getGra
             type: mimeType
         });
         const src_url = URL.createObjectURL(blob);
-        $d30e7bcdac759df9$var$debug(`created Blob Object Url ${src_url} with mime type ${mimeType}`, imageData);
+        $d30e7bcdac759df9$var$debug(`created Blob Object Url ${src_url} for ${resolvedSourcePath} with mime type ${mimeType}`);
         if (render_context.registerRenderPreviewCleanupCallback != null) render_context.registerRenderPreviewCleanupCallback(()=>{
             URL.revokeObjectURL(src_url);
             $d30e7bcdac759df9$var$debug(`revoked Blob Object Url ${src_url}`);
