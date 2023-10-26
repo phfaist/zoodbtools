@@ -6,14 +6,14 @@ import path from 'path';
 import React, { useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { CitationSourceApiPlaceholder } from 'zoodbtools_preview';
-import { ZooDbPreviewComponent } from 'zoodbtools_preview';
+import { CitationSourceApiPlaceholder } from '@phfaist/zoodbtools_preview';
+import { ZooDbPreviewComponent } from '@phfaist/zoodbtools_preview';
 
-import { fsRemoteCreateClient } from 'zoodbtools_previewremote/useFsRemote.js';
+import { fsRemoteCreateClient } from '@phfaist/zoodbtools_previewremote/useFsRemote.js';
 import {
     installFlmContentStyles, simpleRenderObjectWithFlm,
     installZooFlmEnvironmentLinksAndGraphicsHandlers,
-} from 'zoodbtools_preview';
+} from '@phfaist/zoodbtools_preview';
 
 //import * as zooflm from '@phfaist/zoodb/zooflm';
 //import { getfield, iter_object_fields_recursive, sqzhtml } from '@phfaist/zoodb/util';
@@ -24,8 +24,9 @@ import { use_relations_populator } from '@phfaist/zoodb/std/use_relations_popula
 import { use_flm_environment } from '@phfaist/zoodb/std/use_flm_environment';
 import { use_flm_processor } from '@phfaist/zoodb/std/use_flm_processor';
 
-import { StandardZooDb } from '@phfaist/zoodb/std';
-import { StandardZooDbYamlDataLoader } from '@phfaist/zoodb/std/load_yamldb';
+import { ZooDb, ZooDbDataLoaderHandler } from '@phfaist/zoodb';
+import { makeStandardZooDb } from '@phfaist/zoodb/std/stdzoodb';
+import { makeStandardYamlDbDataLoader } from '@phfaist/zoodb/std/stdyamldbdataloader';
 
 import loMerge from 'lodash/merge.js';
 
@@ -45,110 +46,8 @@ const root_data_dir = '/Users/philippe/Research/projects/zoodb/zoodb-example'
 
 
 
-
-export class MyZooDb extends StandardZooDb
+export class MyZooDb extends ZooDb
 {
-    constructor(config)
-    {
-        config ??= {};
-        const fs = config.fs;
-        const fsPromises = config.fs.promises ?? config.fs;
-
-        let searchableCompiledCache = {};
-        try {
-            searchableCompiledCache = JSON.parse(fs.readFileSync(
-                path.join(config.fs_data_dir, '..', 'website', '_zoodb_citations_cache',
-                          'cache_compiled_citations.json')
-            ));
-            console.log(`Loaded citation cache`, searchableCompiledCache);
-        } catch (err) {
-            console.warn(`Couldn't load cache, will proceed without`, err);
-        }
-
-        super(loMerge({
-
-            // fs,
-            // fs_data_dir: path.join(example_root_dir, 'data'),
-
-            use_relations_populator,
-            use_flm_environment,
-            use_flm_processor,
-            use_gitlastmodified_processor: false,
-            use_searchable_text_processor: false,
-
-            continue_with_errors: true,
-
-            flm_options: {
-
-                refs:  {
-                    person: {
-                        formatted_ref_flm_text_fn: (person_id, person) => person.name,
-                    },
-                },
-
-                citations: {
-                    csl_style: config.csl_style,
-                    override_arxiv_dois_file:
-                        'citations_info/override_arxiv_dois.yml',
-                    preset_bibliography_files: [
-                        'citations_info/bib_preset.yml',
-                    ],
-                    default_user_agent: null,
-
-                    sources: {
-                        // latch custom placeholder onto arxiv & doi, since
-                        // their public APIs seem to have strict CORS settings
-                        // meaning we can't call them from other web apps
-                        doi: new CitationSourceApiPlaceholder({
-                            title: (doi) => `[DOI \\verbcode{${doi}}; citation text will appear on production zoo website]`,
-                            cite_prefix: 'doi',
-                            test_url: (_, cite_key) => `https://doi.org/${cite_key}`,
-                            search_in_compiled_cache: searchableCompiledCache,
-                        }),
-                        arxiv: new CitationSourceApiPlaceholder({
-                            title: (arxivid) => `[arXiv:${arxivid}; citation text will appear on production zoo website (& via DOI if published)]`,
-                            cite_prefix: 'arxiv',
-                            test_url: (_, cite_key) => `https://arxiv.org/abs/${cite_key}`,
-                            search_in_compiled_cache: searchableCompiledCache,
-                        }),
-                    },
-
-                    cache_dir: '_zoodb_live_preview_dummy_cache_shouldnt_be_created',
-                    cache_dir_create: false,
-
-                    skip_save_cache: true,
-                },
-                
-                allow_unresolved_references: true,
-                allow_unresolved_citations: true,
-
-                resources: {
-                    // "null" means to use defaults
-                    rename_figure_template: null,
-                    figure_filename_extensions: null,
-                    graphics_resources_fs_data_dir: null,
-                    
-                    // enable srcset= attributes on <img> tags.  This requires
-                    // postprocessing the site files with ParcelJS, as we indeed
-                    // do in this example setup.
-                    graphics_use_srcset_parceljs: false
-                },
-            },
-
-            zoo_permalinks: {
-                object: (objectType, objectId) => (
-                    `invalid:zooObjectLink/${objectType}/${objectId}`
-                ),
-                graphics_resource: (graphics_resource) => (
-                    `invalid:graphicsResource/${graphics_resource.src_url}`
-                ),
-            },
-
-        }, config));
-    }
-
-
-
     //
     // simple example of ZooDb validation -- check that spouses always report
     // the other spouse as their spouse
@@ -172,42 +71,140 @@ export class MyZooDb extends StandardZooDb
 };
 
 
+const schema_root = `file://${root_data_dir}/`;
+
+export async function createMyZooDb(config)
+{
+    config ??= {};
+    const fs = config.fs;
+    const fsPromises = config.fs.promises ?? config.fs;
+
+    let searchableCompiledCache = {};
+    try {
+        searchableCompiledCache = JSON.parse(fs.readFileSync(
+            path.join(config.fs_data_dir, '..', 'website', '_zoodb_citations_cache',
+                      'cache_compiled_citations.json')
+        ));
+        console.log(`Loaded citation cache`, searchableCompiledCache);
+    } catch (err) {
+        console.warn(`Couldn't load cache, will proceed without`, err);
+    }
+
+    config = loMerge({
+
+        ZooDbClass: MyZooDb,
+
+        // fs,
+        // fs_data_dir: path.join(example_root_dir, 'data'),
+
+        use_relations_populator,
+        use_flm_environment,
+        use_flm_processor,
+        use_gitlastmodified_processor: false,
+        use_searchable_text_processor: false,
+
+        continue_with_errors: true,
+
+        flm_options: {
+
+            refs:  {
+                person: {
+                    formatted_ref_flm_text_fn: (person_id, person) => person.name,
+                },
+            },
+
+            citations: {
+                csl_style: config.csl_style,
+                override_arxiv_dois_file:
+                    'citations_info/override_arxiv_dois.yml',
+                preset_bibliography_files: [
+                    'citations_info/bib_preset.yml',
+                ],
+                default_user_agent: null,
+
+                sources: {
+                    // latch custom placeholder onto arxiv & doi, since
+                    // their public APIs seem to have strict CORS settings
+                    // meaning we can't call them from other web apps
+                    doi: new CitationSourceApiPlaceholder({
+                        title: (doi) => `[DOI \\verbcode{${doi}}; citation text will appear on production zoo website]`,
+                        cite_prefix: 'doi',
+                        test_url: (_, cite_key) => `https://doi.org/${cite_key}`,
+                        search_in_compiled_cache: searchableCompiledCache,
+                    }),
+                    arxiv: new CitationSourceApiPlaceholder({
+                        title: (arxivid) => `[arXiv:${arxivid}; citation text will appear on production zoo website (& via DOI if published)]`,
+                        cite_prefix: 'arxiv',
+                        test_url: (_, cite_key) => `https://arxiv.org/abs/${cite_key}`,
+                        search_in_compiled_cache: searchableCompiledCache,
+                    }),
+                },
+
+                cache_dir: '_zoodb_live_preview_dummy_cache_shouldnt_be_created',
+                cache_dir_create: false,
+
+                skip_save_cache: true,
+            },
+            
+            allow_unresolved_references: true,
+            allow_unresolved_citations: true,
+
+            resources: {
+                // "null" means to use defaults
+                rename_figure_template: null,
+                figure_filename_extensions: null,
+                graphics_resources_fs_data_dir: null,
+                
+                // enable srcset= attributes on <img> tags.  This requires
+                // postprocessing the site files with ParcelJS, as we indeed
+                // do in this example setup.
+                graphics_use_srcset_parceljs: false
+            },
+        },
+
+        zoo_permalinks: {
+            object: (objectType, objectId) => (
+                `invalid:zooObjectLink/${objectType}/${objectId}`
+            ),
+            graphics_resource: (graphics_resource) => (
+                `invalid:graphicsResource/${graphics_resource.src_url}`
+            ),
+        },
+
+        //
+        // specify where to find schemas
+        //
+        schemas: {
+            schema_root: schema_root,
+            schema_rel_path: 'schemas/',
+            schema_add_extension: '.yml',
+        },
+
+
+    }, config);
+
+    return await makeStandardZooDb(config);
+}
+
 
 // -----------------------------------------------------------------------------
 
-
-const schema_root = `file://${root_data_dir}/`;
-
-export class MyZooDbYamlDataLoader extends StandardZooDbYamlDataLoader
+export async function createMyYamlDbDataLoader(zoodb)
 {
-    constructor()
-    {
-        super({
-            throw_reload_errors: true,
-
-            //
-            // specify objects & where to find them
-            //
-            objects: {
-                person: {
-                    schema_name: 'person',
-                    data_src_path: 'people/',
-                },
+    let config = {
+        //
+        // specify objects & where to find them
+        //
+        objects: {
+            person: {
+                schema_name: 'person',
+                data_src_path: 'people/',
             },
-            
-            //
-            // specify where to find schemas
-            //
-            schemas: {
-                schema_root: schema_root,
-                schema_rel_path: 'schemas/',
-                schema_add_extension: '.yml',
-            },
+        },
+    };
 
-        });
-        this.schema_root = schema_root;
-    }
-};
+    return await makeStandardYamlDbDataLoader(zoodb, config);
+}
 
 
 
@@ -305,11 +302,19 @@ window.addEventListener('load', async () => {
             csl_style: await fs.promises.readFile( 'peopledbjs/american-physical-society-et-al--patched.csl', { encoding: 'utf-8', }, )
         };
 
-        const zoodb = new MyZooDb(zoodbOpts);
+        const zoodb = await createMyZooDb(zoodbOpts);
+        const zoodbloader = await createMyYamlDbDataLoader(zoodb);
 
-        zoodb.install_zoo_loader(new MyZooDbYamlDataLoader());
-
+        const zoodb_loader_handler = new ZooDbDataLoaderHandler(
+            zoodbloader,
+            {
+                throw_reload_errors: false, // for when in devel mode with eleventy
+            }
+        );
+        zoodb.install_zoo_loader_handler(zoodb_loader_handler);
+    
         await zoodb.load();
+
 
         installZooFlmEnvironmentLinksAndGraphicsHandlers(
             zoodb.zoo_flm_environment,

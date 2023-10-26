@@ -195,6 +195,7 @@ export function ZooDbGithubRepoPreviewComponent(props)
                     (newGitBranch) => setGitBranch({...newGitBranch, userLoadVersion: gitBranch.userLoadVersion+1})
                 }
             />
+            {props.children}
         </ZooDbPreviewComponent>
     );
 

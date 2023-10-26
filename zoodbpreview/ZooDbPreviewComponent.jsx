@@ -24,8 +24,6 @@ export function ZooDbPreviewComponent(props)
         initialObjectType,
         initialObjectId,
         getMathJax,
-        // incompleteSelectionRenderHtml,
-        // CommandButtonsComponent,
         commandButtonsUseReload,
         commandButtonsToggleDarkModeCallback,
         userLoadVersion,

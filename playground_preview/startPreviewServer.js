@@ -7,7 +7,7 @@ const debug = require('debug')('zoodbtools_playground_preview.startPreviewServer
 async function go()
 {
     const { PreviewAppServer } =
-          await import('zoodbtools_previewremote/startRemotePreviewApp.js');
+          await import('@phfaist/zoodbtools_previewremote/startRemotePreviewApp.js');
     
     const settings = {
         appFilesDir: "dist/", // where parcel will create the app distribution files
