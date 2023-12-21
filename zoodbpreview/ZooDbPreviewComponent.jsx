@@ -128,11 +128,14 @@ export function ZooDbPreviewComponent(props)
         getMathJax,
         onLinkClick,
     };
-    let extraPreviewComponentInstances = extraPreviewComponents.map(
-        (ComponentClass) => (
-            <ComponentClass {...extraComponentsProps} />
-        )
-    );
+    let extraPreviewComponentInstances = [];
+    if (extraPreviewComponents) {
+        extraPreviewComponentInstances = extraPreviewComponents.map(
+            (ComponentClass) => (
+                <ComponentClass {...extraComponentsProps} />
+            )
+        );
+    }
 
     debug(`ZooDbPreviewComponent, render`, { zooDbAccess, selectedObjectTypeAndId });
 

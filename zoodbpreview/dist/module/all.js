@@ -288,64 +288,69 @@ function $e81314a651474654$export$fd3ba78121e14bde(props) {
 
 
 const $042179933fe4954c$var$debug = (0, $b6z2V$debug)("zoodbtoolspreview.ZooDbSelectObjectTypeAndIdComponent");
+const $042179933fe4954c$var$formatGroupLabel = (data)=>/*#__PURE__*/ (0, $b6z2V$jsxs)("div", {
+        className: "zoodb-preview-select-item-group-label",
+        children: [
+            /*#__PURE__*/ (0, $b6z2V$jsx)("span", {
+                children: data.label
+            }),
+            /*#__PURE__*/ (0, $b6z2V$jsx)("span", {
+                className: "zoodb-preview-select-item-group-label-badge",
+                children: data.options.length
+            })
+        ]
+    });
 function $042179933fe4954c$export$82b75c6b8a82ac20(props) {
     let { zoodb: zoodb, objectType: objectType, objectId: objectId, onChangeObjectTypeAndId: onChangeObjectTypeAndId } = props;
     objectType ||= "";
     objectId ||= "";
     let isDisabled = true;
-    let selectObjectTypeOptions = [];
-    let selectObjectIdOptions = [];
+    let mainSelectOptions = [];
     if (zoodb != null) {
         isDisabled = false;
         let allObjectTypes = Object.keys(zoodb.objects);
         allObjectTypes.sort();
-        selectObjectTypeOptions = allObjectTypes.map((x)=>({
-                value: x,
-                label: x
-            }));
-        selectObjectTypeOptions.push({
-            value: "",
-            label: "(select object type)"
-        });
-        if (objectType && zoodb.objects[objectType]) {
+        for (const objectType of allObjectTypes){
             let allObjectIds = Object.keys(zoodb.objects[objectType]);
             allObjectIds.sort();
-            selectObjectIdOptions = allObjectIds.map((x)=>({
-                    value: x,
-                    label: x
-                }));
+            mainSelectOptions.push({
+                label: objectType,
+                options: allObjectIds.map((objectId)=>({
+                        value: JSON.stringify({
+                            objectType: objectType,
+                            objectId: objectId
+                        }),
+                        label: objectId
+                    }))
+            });
         }
-        selectObjectIdOptions.push({
-            value: "",
+        mainSelectOptions.push({
+            value: "{}",
             label: "(select object)"
         });
     }
-    return /*#__PURE__*/ (0, $b6z2V$jsxs)("div", {
+    let callbackOnChange = (newValue)=>{
+        if (!newValue || !newValue.value) onChangeObjectTypeAndId(null, null);
+        let { objectType: objectType, objectId: objectId } = JSON.parse(newValue.value);
+        onChangeObjectTypeAndId(objectType, objectId);
+    };
+    return /*#__PURE__*/ (0, $b6z2V$jsx)("div", {
         className: "zoodb-preview-select-bar",
-        children: [
-            /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$reactselect), {
-                className: "zoodb-preview-select-objecttype",
-                classNamePrefix: "zoodb-preview-react-select",
-                isDisabled: isDisabled,
-                value: {
-                    value: objectType,
-                    label: objectType
-                },
-                onChange: (newValue)=>onChangeObjectTypeAndId(newValue.value, null),
-                options: selectObjectTypeOptions
-            }),
-            /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$reactselect), {
-                className: "zoodb-preview-select-objectid",
-                classNamePrefix: "zoodb-preview-react-select",
-                isDisabled: isDisabled,
-                value: {
-                    value: objectId,
-                    label: objectId
-                },
-                onChange: (newValue)=>onChangeObjectTypeAndId(objectType, newValue.value),
-                options: selectObjectIdOptions
-            })
-        ]
+        children: /*#__PURE__*/ (0, $b6z2V$jsx)((0, $b6z2V$reactselect), {
+            className: "zoodb-preview-select-objecttypeandid",
+            classNamePrefix: "zoodb-preview-react-select",
+            isDisabled: isDisabled,
+            value: {
+                value: JSON.stringify({
+                    objectType: objectType,
+                    objectId: objectId
+                }),
+                label: objectId
+            },
+            onChange: callbackOnChange,
+            options: mainSelectOptions,
+            formatGroupLabel: $042179933fe4954c$var$formatGroupLabel
+        })
     });
 }
 
@@ -526,9 +531,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
     $55cc9c1ed9922b9a$var$debug(`ZooDbPreviewComponent()`, {
         props: props
     });
-    let { loadZooDb: loadZooDb, reloadZooDb: reloadZooDb, renderObject: renderObject, initialObjectType: initialObjectType, initialObjectId: initialObjectId, getMathJax: getMathJax, commandButtonsUseReload: // incompleteSelectionRenderHtml,
-    // CommandButtonsComponent,
-    commandButtonsUseReload, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, userLoadVersion: userLoadVersion } = props;
+    let { loadZooDb: loadZooDb, reloadZooDb: reloadZooDb, renderObject: renderObject, initialObjectType: initialObjectType, initialObjectId: initialObjectId, getMathJax: getMathJax, commandButtonsUseReload: commandButtonsUseReload, commandButtonsToggleDarkModeCallback: commandButtonsToggleDarkModeCallback, extraPreviewComponents: extraPreviewComponents, userLoadVersion: userLoadVersion } = props;
     initialObjectType ||= "";
     initialObjectId ||= "";
     // React states and effects --
@@ -594,6 +597,16 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
         className: "zoodb-preview-command-buttons",
         children: commandButtonsContents
     });
+    let extraComponentsProps = {
+        zooDbAccess: zooDbAccess,
+        selectedObjectTypeAndId: selectedObjectTypeAndId,
+        getMathJax: getMathJax,
+        onLinkClick: onLinkClick
+    };
+    let extraPreviewComponentInstances = [];
+    if (extraPreviewComponents) extraPreviewComponentInstances = extraPreviewComponents.map((ComponentClass)=>/*#__PURE__*/ (0, $b6z2V$jsx)(ComponentClass, {
+            ...extraComponentsProps
+        }));
     $55cc9c1ed9922b9a$var$debug(`ZooDbPreviewComponent, render`, {
         zooDbAccess: zooDbAccess,
         selectedObjectTypeAndId: selectedObjectTypeAndId
@@ -619,6 +632,7 @@ function $55cc9c1ed9922b9a$export$e01b7c63ae589d4b(props) {
                 onLinkClick: onLinkClick
             }),
             commandButtonsContents,
+            extraPreviewComponentInstances,
             props.children
         ]
     });

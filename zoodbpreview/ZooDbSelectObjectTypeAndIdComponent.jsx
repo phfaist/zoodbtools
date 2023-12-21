@@ -7,6 +7,17 @@ import Select from 'react-select';
 import './ZooDbSelectObjectTypeAndIdComponent_style.scss';
 
 
+  
+const formatGroupLabel = (data) => (
+  <div className="zoodb-preview-select-item-group-label">
+    <span>{data.label}</span>
+    <span className="zoodb-preview-select-item-group-label-badge">{data.options.length}</span>
+  </div>
+);
+
+
+
+
 
 
 export function ZooDbSelectObjectTypeAndIdComponent(props)
@@ -22,8 +33,7 @@ export function ZooDbSelectObjectTypeAndIdComponent(props)
     objectId ||= "";
 
     let isDisabled = true;
-    let selectObjectTypeOptions = [];
-    let selectObjectIdOptions = [];
+    let mainSelectOptions = [];
 
     if (zoodb != null) {
 
@@ -32,44 +42,46 @@ export function ZooDbSelectObjectTypeAndIdComponent(props)
         let allObjectTypes = Object.keys(zoodb.objects);
         allObjectTypes.sort();
 
-        selectObjectTypeOptions = allObjectTypes.map(
-            (x) => ({ value: x, label: x })
-        );
-        selectObjectTypeOptions.push(
-            { value: "", label: "(select object type)" }
-        )
-
-        if (objectType && zoodb.objects[objectType]) {
+        for (const objectType of allObjectTypes) {
             let allObjectIds = Object.keys(zoodb.objects[objectType]);
             allObjectIds.sort();
 
-            selectObjectIdOptions = allObjectIds.map(
-                (x) => ({ value: x, label: x })
-            );
+            mainSelectOptions.push({
+                label: objectType,
+                options: allObjectIds.map(
+                    (objectId) => ({
+                        value: JSON.stringify({objectType,objectId}),
+                        label: objectId,
+                    })
+                )
+            });
         }
-        selectObjectIdOptions.push(
-            { value: "", label: "(select object)" }
+        mainSelectOptions.push(
+            { value: "{}", label: "(select object)" }
         );
 
     }
 
+    let callbackOnChange = (newValue) => {
+        if ( ! newValue || ! newValue.value ) {
+            onChangeObjectTypeAndId(null, null);
+        }
+        let { objectType, objectId } = JSON.parse(newValue.value);
+        onChangeObjectTypeAndId(objectType, objectId);
+    };
+
     return (
         <div className="zoodb-preview-select-bar">
             <Select
-                className="zoodb-preview-select-objecttype"
+                className="zoodb-preview-select-objecttypeandid"
                 classNamePrefix="zoodb-preview-react-select"
                 isDisabled={isDisabled}
-                value={{value: objectType, label: objectType}}
-                onChange={(newValue) => onChangeObjectTypeAndId(newValue.value, null)}
-                options={selectObjectTypeOptions}
-            />
-            <Select
-                className="zoodb-preview-select-objectid"
-                classNamePrefix="zoodb-preview-react-select"
-                isDisabled={isDisabled}
-                value={{value: objectId, label: objectId }}
-                onChange={(newValue) => onChangeObjectTypeAndId(objectType, newValue.value)}
-                options={selectObjectIdOptions}
+                value={
+                    { value: JSON.stringify({objectType,objectId}), label: objectId }
+                }
+                onChange={callbackOnChange}
+                options={mainSelectOptions}
+                formatGroupLabel={formatGroupLabel}
             />
         </div>
     );

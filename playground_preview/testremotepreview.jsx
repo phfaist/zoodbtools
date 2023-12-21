@@ -37,7 +37,7 @@ import loMerge from 'lodash/merge.js';
 
 
 
-const root_data_dir = '/Users/philippe/Research/projects/zoodb/zoodb-example'
+const root_data_dir = '/Users/philippe/Research/projects/zoodb/zoodb-example';
 
 
 
@@ -207,32 +207,6 @@ export async function createMyYamlDbDataLoader(zoodb)
 }
 
 
-
-
-
-// function ReloadCommandButtonsComponent(props)
-// {
-//     const { zoodb, doRefreshPreview } = props;
-
-//     const btnDomRef = useRef(null);
-
-//     const doReloadZoo = async () => {
-//         btnDomRef.current.disabled = true;
-//         try {
-//             await zoodb.load()
-//             debug(`Finished reloading the zoo.`);
-//         } finally {
-//             btnDomRef.current.disabled = false;
-//             doRefreshPreview();
-//         }
-//     };
-
-//     return (
-//         <div className="CommandButtonsComponent">
-//             <button onClick={doReloadZoo} ref={btnDomRef}>RELOAD ZOO</button>
-//         </div>
-//     );
-// };
 
 
 

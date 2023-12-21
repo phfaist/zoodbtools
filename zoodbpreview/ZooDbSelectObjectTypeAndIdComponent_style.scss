@@ -1,16 +1,35 @@
 .zoodb-preview-select-bar {
     display: flex;
 
-    .zoodb-preview-select-objecttype {
-        flex: 1 120px;
-    }
-    .zoodb-preview-select-objectid {
-        flex: 3 400px;
+    // .zoodb-preview-select-objecttype {
+    //     flex: 1 120px;
+    // }
+    // .zoodb-preview-select-objectid {
+    //     flex: 3 400px;
+    // }
+    .zoodb-preview-select-objecttypeandid {
+        flex: 1 400px;
     }
 
 }
 
 
+.zoodb-preview-select-item-group-label {
+    display: flex;
+    align-items: left; //center;
+    gap: 1em;
+    //justify-content: space-between;
+}
+.zoodb-preview-select-item-group-label-badge {
+    background-color: rgba(127,127,127,0.2);
+    border-radius: 2em;
+    display: inline-block;
+    font-size: .9em;
+    font-weight: normal;
+    line-height: 1;
+    padding: 0.2em 1em;
+    text-align: center;
+}
 
 
 //

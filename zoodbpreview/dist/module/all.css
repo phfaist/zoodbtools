@@ -61,12 +61,25 @@
   display: flex;
 }
 
-.zoodb-preview-select-bar .zoodb-preview-select-objecttype {
-  flex: 120px;
+.zoodb-preview-select-bar .zoodb-preview-select-objecttypeandid {
+  flex: 400px;
 }
 
-.zoodb-preview-select-bar .zoodb-preview-select-objectid {
-  flex: 3 400px;
+.zoodb-preview-select-item-group-label {
+  align-items: left;
+  gap: 1em;
+  display: flex;
+}
+
+.zoodb-preview-select-item-group-label-badge {
+  text-align: center;
+  background-color: #7f7f7f33;
+  border-radius: 2em;
+  padding: .2em 1em;
+  font-size: .9em;
+  font-weight: normal;
+  line-height: 1;
+  display: inline-block;
 }
 
 .dark .zoodb-preview-content {
@@ -130,12 +143,12 @@
 }
 
 .ZooDbPreviewComponent .zoodb-preview-content {
-  grid-area: 2 / 1 / 3 / 3;
+  grid-area: 2 / 1 / 3 / 99;
   overflow: auto;
 }
 
 .ZooDbPreviewComponent .zoodb-preview-messages {
-  grid-area: 3 / 1 / 4 / 3;
+  grid-area: 3 / 1 / 4 / 99;
   overflow: auto;
 }
 

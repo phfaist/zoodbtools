@@ -1,0 +1,4 @@
+*/dist/module/*.js          binary
+*/dist/module/*.js.map      binary
+*/dist/module/*.css         binary
+*/dist/module/*.css.map     binary
