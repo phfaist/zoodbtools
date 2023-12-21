@@ -26,6 +26,7 @@ export function ZooDbPreviewComponent(props)
         getMathJax,
         commandButtonsUseReload,
         commandButtonsToggleDarkModeCallback,
+        extraPreviewComponents,
         userLoadVersion,
     } = props;
 
@@ -121,6 +122,18 @@ export function ZooDbPreviewComponent(props)
         );
     };
 
+    let extraComponentsProps = {
+        zooDbAccess,
+        selectedObjectTypeAndId,
+        getMathJax,
+        onLinkClick,
+    };
+    let extraPreviewComponentInstances = extraPreviewComponents.map(
+        (ComponentClass) => (
+            <ComponentClass {...extraComponentsProps} />
+        )
+    );
+
     debug(`ZooDbPreviewComponent, render`, { zooDbAccess, selectedObjectTypeAndId });
 
     return (
@@ -142,6 +155,7 @@ export function ZooDbPreviewComponent(props)
                 onLinkClick={onLinkClick}
             />
             {commandButtonsContents}
+            {extraPreviewComponentInstances}
             {props.children}
         </div>
     );

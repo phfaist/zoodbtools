@@ -311,7 +311,7 @@ window.addEventListener('load', async () => {
                 throw_reload_errors: false, // for when in devel mode with eleventy
             }
         );
-        zoodb.install_zoo_loader_handler(zoodb_loader_handler);
+        await zoodb.install_zoo_loader_handler(zoodb_loader_handler);
     
         await zoodb.load();
 
