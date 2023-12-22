@@ -7,9 +7,12 @@
     "zoodbpreview",
     "zoodbpreviewremote",
     "zoodbgitpreview",
-    "playground_preview"
+    "zoodbsearch",
+    "playground_preview",
+    "playground_search"
   ],
   "devDependencies": {
+    "@parcel/transformer-inline-string": "2.9.3",
     "@parcel/transformer-sass": "2.9.3",
     "assert": "^2.0.0",
     "browserify-zlib": "^0.2.0",

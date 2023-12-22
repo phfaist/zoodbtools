@@ -8,7 +8,7 @@ yarn-error.log
 
 .parcel-cache
 
-playground_preview/dist/
+playground_*/dist/
 
 .pnp.*
 .yarn/*

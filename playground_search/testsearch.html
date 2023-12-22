@@ -4,15 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script type="module" src="mytestpreview.jsx" async></script>
-
     <style type="text/css">
 html, body { width: 100%; height: 100%; margin: 0px; padding: 0px; background-color: rgb(220,220,255); }
 body { padding: 20px; box-sizing: border-box; background-color: white; }
-#AppContainer {
-    width: 100%; height: 100%; margin: 0px; padding: 0px;
-    background-color: rgba(255,255,230);
-}
+
     </style>
 <script type="text/javascript">
 MathJax = {
@@ -45,9 +40,42 @@ function typesetPageMathPromise()
 }
 </script>
 
+<script type="module">
+async function setupSearch()
+{
+    const { SearchIndex } = await import('@phfaist/zoodbtools_search/searchindex.js');
+    const { SearchWidget } = await import('@phfaist/zoodbtools_search/searchwidget.js');
+    const searchIndexDocsJsonSource = await import('bundle-text:./ecztestsrchidx.json');
+
+    console.log({searchIndexDocsJsonSource});
+
+    const domContainer = window.document.getElementById('SearchWidget');
+
+    const srchData = JSON.parse(searchIndexDocsJsonSource);
+
+    const srchIndex = SearchIndex.load(search_index_data);
+
+    const resolve_href = (object_type, object_id, object_doc) => {
+        return `javascript:alert('Clicked ${object_type}:${object_id}');`;
+    };
+
+    window.search_widget = new SearchWidget(search_index, {
+        dom_container,
+        initial_search_query,
+        resolve_href,
+        context_length: 200,
+        getMathJax: () => window.MathJax,
+        tippyAppearanceTheme: 'light',
+    });
+}
+window.addEventListener('load', setupSearch);
+</script>
+
   </head>
   <body>
-    <div id="AppContainer"></div>
+    <div id="SearchWidget">
+        <span style="font-style: italic">loading …</span>
+    </div>
 
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

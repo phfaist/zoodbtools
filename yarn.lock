@@ -1130,6 +1130,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@parcel/transformer-inline-string@npm:2.9.3":
+  version: 2.9.3
+  resolution: "@parcel/transformer-inline-string@npm:2.9.3"
+  dependencies:
+    "@parcel/plugin": 2.9.3
+  checksum: e93463e7bbad1f12721845d88466b5d642955349b674c4126323092b12c28db2d41e2eac579552563a5d7fb25bbbab3975a465e39e2689c397fe43fa2de5cb67
+  languageName: node
+  linkType: hard
+
 "@parcel/transformer-js@npm:2.9.3":
   version: 2.9.3
   resolution: "@parcel/transformer-js@npm:2.9.3"
@@ -1298,7 +1307,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=cb123a&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=843cb2&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1313,14 +1322,38 @@ __metadata:
     js-yaml: ^4.1.0
     jsonschema: ^1.4.1
     lodash: ^4.17.21
-    lunr: ^2.3.9
     node-fetch: ^3.2.10
     parse-full-name: ^1.2.6
     sax: ^1.2.4
     stream-parser: ^0.3.1
-    tippy.js: ^6.3.7
     url: ^0.11.0
-  checksum: 785c0a17fd53667a59b84c57611a6706ef6c52a9a29e708778bd8a9d3d4a9e5b65ff06eb93cc6933dfbdf0a52af5226d9f835052002c3bf8c1a8ff6184359e4c
+  checksum: 56eae744b754a4b80af5e0361152c38e2af53f3b907648f01818c8b4b196ee075e5a49ca7e272b114fabad3332dade4a961a5ea88fb7a7bc31a57575e3160a4e
+  languageName: node
+  linkType: hard
+
+"@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_search%40workspace%3Aplayground_search":
+  version: 0.1.1
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=843cb2&locator=zoodbtools_playground_search%40workspace%3Aplayground_search"
+  dependencies:
+    "@apidevtools/json-schema-ref-parser": ^10.1.0
+    base32-encode: ^2.0.0
+    browser-process-hrtime: ^1.0.0
+    citeproc: ^2.4.62
+    debug: ^4.3.4
+    escape-html: ^1.0.3
+    exif-parser: ^0.1.12
+    feedparser: ^2.2.10
+    glob: ^8.0.3
+    hash.js: ^1.1.7
+    js-yaml: ^4.1.0
+    jsonschema: ^1.4.1
+    lodash: ^4.17.21
+    node-fetch: ^3.2.10
+    parse-full-name: ^1.2.6
+    sax: ^1.2.4
+    stream-parser: ^0.3.1
+    url: ^0.11.0
+  checksum: 56eae744b754a4b80af5e0361152c38e2af53f3b907648f01818c8b4b196ee075e5a49ca7e272b114fabad3332dade4a961a5ea88fb7a7bc31a57575e3160a4e
   languageName: node
   linkType: hard
 
@@ -1328,6 +1361,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@phfaist/zoodbtools@workspace:."
   dependencies:
+    "@parcel/transformer-inline-string": 2.9.3
     "@parcel/transformer-sass": 2.9.3
     assert: ^2.0.0
     browserify-zlib: ^0.2.0
@@ -1387,6 +1421,17 @@ __metadata:
     glob: ^10.3.3
     mime-types: ^2.1.35
     open: ^9.1.0
+  peerDependencies:
+    "@phfaist/zoodb": "*"
+  languageName: unknown
+  linkType: soft
+
+"@phfaist/zoodbtools_search@>=0.0.1, @phfaist/zoodbtools_search@workspace:zoodbsearch":
+  version: 0.0.0-use.local
+  resolution: "@phfaist/zoodbtools_search@workspace:zoodbsearch"
+  dependencies:
+    lunr: ^2.3.9
+    tippy.js: ^6.3.7
   peerDependencies:
     "@phfaist/zoodb": "*"
   languageName: unknown
@@ -6290,6 +6335,19 @@ __metadata:
     parcel-optimizer-nohtmlsuffix: "https://github.com/phfaist/parcel-optimizer-nohtmlsuffix"
     pify: ^6.1.0
     sirv-cli: ^2.0.2
+  peerDependencies:
+    "@phfaist/zoodb": "*"
+  languageName: unknown
+  linkType: soft
+
+"zoodbtools_playground_search@workspace:playground_search":
+  version: 0.0.0-use.local
+  resolution: "zoodbtools_playground_search@workspace:playground_search"
+  dependencies:
+    "@phfaist/zoodb": "file:../../zoodb"
+    "@phfaist/zoodbtools_search": ">=0.0.1"
+    debug: ^4.3.4
+    parcel: ^2.9.3
   peerDependencies:
     "@phfaist/zoodb": "*"
   languageName: unknown

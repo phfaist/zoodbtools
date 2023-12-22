@@ -1,0 +1,12 @@
+{
+    "name": "@phfaist/zoodbtools_search",
+    "version": "0.1.0",
+    "type": "module",
+    "dependencies": {
+        "lunr": "^2.3.9",
+        "tippy.js": "^6.3.7"
+    },
+    "peerDependencies": {
+        "@phfaist/zoodb": "*"
+    }
+}
