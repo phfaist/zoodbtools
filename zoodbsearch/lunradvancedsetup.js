@@ -124,7 +124,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
                             }
                         )
                     );
-                    debug(`Adding n-gram token `, { n, nGramToken });
+                    //debug(`Adding n-gram token `, { n, nGramToken });
                     tokens.push( nGramToken );
                 }
             }
@@ -211,7 +211,7 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
         this.options = options || {};
 
         if (this.options.useRegexpTokenParser) {
-            this.lexer = new RegexpTokenLunrQueryLexer(str, computed);
+            this.lexer = new RegexpTokenLunrQueryLexer(str, options, computed);
         }
 
         this.rawParsedClauseList = [];
@@ -229,7 +229,7 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
         if (includeNGramsUpTo > 1) {
             add_help_html_paras.push(
                 `Use double-quotes (<code>"Ising model"</code>) to search for full phrases`
-                + ` (up to ${includeNGramsUpTo} terms in a phrase; very experimental)`
+                + ` (experimental!)`
             );
         }
 
@@ -251,9 +251,9 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
         rawParsedClause._is_simple_clause = (
             rawParsedClause.fields == null
             && rawParsedClause.boost == null
-            && rawParsedClause.wildcard == null
-            && (!rawParsedClause.term.startsWith('*'))
-            && (!rawParsedClause.term.endsWith('*'))
+            // && rawParsedClause.wildcard == null
+            // && (!rawParsedClause.term.startsWith('*'))
+            // && (!rawParsedClause.term.endsWith('*'))
             && rawParsedClause.presence == null
         );
         debug(`Adding raw parsed clause: `, { rawParsedClause });
@@ -319,12 +319,13 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
 
 export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
 {
-    constructor(str, { rxAnyToken, tokenizers })
+    constructor(str, options, { rxAnyToken, tokenizers })
     {
         debug(`Constructing custom QueryLexer instance.`, {str, rxAnyToken});
         super(str);
 
         this.tokenizers = tokenizers;
+        this.options = options;
 
         // // RegExp must assert the full string to be tested is a valid token,
         // // including possible '*' wildcards at the beginning & end of the token.
@@ -360,11 +361,24 @@ export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
             let tokens = this.tokenizers.singleTokenizerWithWildcard(str, {});
             let terms = [];
             if (isDoubleQuoted) {
-                terms = [
-                    [ tokens.map( (t) => t.str ).join(' '),
-                      this.start,
-                      this.pos ]
-                ];
+                // we'd want to put all tokens together in a single N-gram term/token.  But
+                // if we have more words than we chose n (options.includeNGramsUpTo), then
+                // we'll get zero matches because we didn't index N-grams for large enough
+                // N.  To remedy this issue, we add as search terms all n-grams (which are
+                // indexed) that can be formed as subsets of this N-gram.  E.g. if n=3, the
+                // term "one two three four five" will give the search terms "one two three",
+                // "two three four", and "three four five".
+                const n = this.options.includeNGramsUpTo;
+                for (let j = 0; j == 0 || j + n <= tokens.length; ++j) {
+                    const tokenSlice = tokens.slice(j, j+n);
+                    const firstMetaPos = tokenSlice[0].metadata.position;
+                    const lastMetaPos = tokenSlice[tokenSlice.length-1].metadata.position;
+                    terms.push([
+                        tokenSlice.map( (t) => t.str ).join(' '),
+                        firstMetaPos[0],
+                        lastMetaPos[0] + lastMetaPos[1]
+                    ]);
+                };
             } else {
                 terms = tokens.map( (t) =>
                     [ t.str, t.metadata.position[0], t.metadata.position[0]+t.metadata.position[1] ]
