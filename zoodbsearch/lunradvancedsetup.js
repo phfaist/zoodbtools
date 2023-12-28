@@ -124,7 +124,7 @@ export function lunrAdvancedSetupRegexpTokenizerPlugin(builder, options, { rxAny
     builder.tokenizer = getRegexpTokenLunrTokenizer(options, { rxAnyToken });
 }
 
-export function getLunrOptionsAdvancedSetup(options)
+export function getLunrCustomOptionsAdvancedSetup(options)
 {
     options = loMerge(
         {
@@ -168,6 +168,8 @@ export function getLunrOptionsAdvancedSetup(options)
             super(str, query, options, { rxAnyToken });
         }
     };
+    _RegexpTokenLunrQueryParser.add_help_html_paras =
+        RegexpTokenLunrQueryParserWithOptions.getHtmlHelpParas(options, { rxAnyToken });
 
     return {
         lunr_plugins,
@@ -192,6 +194,23 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
         this.rawParsedClauseList = [];
 
         debug(`Constructed custom RegexpTokenLunrQueryParser, lexer is =`, this.lexer);
+    }
+
+    static getHtmlHelpParas(options, { rxAnyToken })
+    {
+        const { includeNGramsUpTo } = options;
+
+        let add_help_html_paras = [];
+        // if n-grams are supported, alert the reader to the fact that they can search
+        // for full phrases with double quotes.
+        if (includeNGramsUpTo > 1) {
+            add_help_html_paras.push(
+                `Use double-quotes (<code>"Ising model"</code>) to search for full phrases`
+                + ` (up to ${includeNGramsUpTo} terms in a phrase; very experimental)`
+            );
+        }
+
+        return add_help_html_paras;
     }
 
     // override function that flushes a new clause into the clause list
@@ -297,6 +316,18 @@ export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
         this.rxSimpleFieldChar = /[A-Za-z0-9_]/;
     }
 
+    sliceString()
+    {
+        let str = super.sliceString();
+        if (str.length > 0 && str[0] === '"') {
+            str = str.slice(1);
+        }
+        if (str.length > 0 && str[str.length-1] === '"') {
+            str = str.slice(0, str.length-1);
+        }
+        return str;
+    }
+
     run()
     {
         let state = RegexpTokenLunrQueryLexer.lexText;
@@ -323,32 +354,45 @@ RegexpTokenLunrQueryLexer.lexTerm = function (lexer) {
         lexer.emit(lunr.QueryLexer.TERM);
     }
   
-    lexer.ignore()
+    lexer.ignore();
   
     if (lexer.more()) {
-        return RegexpTokenLunrQueryLexer.lexText
+        return RegexpTokenLunrQueryLexer.lexText;
     }
 };
 RegexpTokenLunrQueryLexer.lexEditDistance = function (lexer) {
-    lexer.ignore()
-    lexer.acceptDigitRun()
-    lexer.emit(lunr.QueryLexer.EDIT_DISTANCE)
+    lexer.ignore();
+    lexer.acceptDigitRun();
+    lexer.emit(lunr.QueryLexer.EDIT_DISTANCE);
     return RegexpTokenLunrQueryLexer.lexText;
 };
 RegexpTokenLunrQueryLexer.lexBoost = function (lexer) {
-    lexer.ignore()
-    lexer.acceptDigitRun()
-    lexer.emit(lunr.QueryLexer.BOOST)
-    return RegexpTokenLunrQueryLexer.lexText
+    lexer.ignore();
+    lexer.acceptDigitRun();
+    lexer.emit(lunr.QueryLexer.BOOST);
+    return RegexpTokenLunrQueryLexer.lexText;
 };
 RegexpTokenLunrQueryLexer.lexEOS = function (lexer) {
     if (lexer.width() > 0) {
-        lexer.emit(lunr.QueryLexer.TERM)
+        lexer.emit(lunr.QueryLexer.TERM);
+    }
+};
+RegexpTokenLunrQueryLexer.lexQuotedText = function (lexer) {
+    while (true) {
+        const char = lexer.next();
+
+        if (char === lunr.QueryLexer.EOS) {
+            // implicitly add closing double-quote and accept the term
+            return RegexpTokenLunrQueryLexer.lexEOS;
+        }
+        if (char === '"') {
+            return RegexpTokenLunrQueryLexer.lexTerm;
+        }
     }
 };
 RegexpTokenLunrQueryLexer.lexText = function (lexer) {
     while (true) {
-        var char = lexer.next();
+        const char = lexer.next();
 
         //debug(`lexText() got char = `, char);
     
@@ -360,6 +404,11 @@ RegexpTokenLunrQueryLexer.lexText = function (lexer) {
         if (char.charCodeAt(0) == 92) {
             lexer.escapeCharacter();
             continue;
+        }
+
+        if (char === '"') {
+            // quoted term.
+            return RegexpTokenLunrQueryLexer.lexQuotedText;
         }
     
         if (char === ":") {

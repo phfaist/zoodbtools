@@ -82,8 +82,8 @@ export class SearchIndex
 
     installLunrCustomization({ lunr_plugins, lunr_query_parser_class })
     {
-        this.lunr_options.lunr_plugins = lunr_plugins;
-        this.lunr_options.lunr_query_parser_class = lunr_query_parser_class;
+        this.lunr_custom_options.lunr_plugins = lunr_plugins;
+        this.lunr_custom_options.lunr_query_parser_class = lunr_query_parser_class;
     }
 
     build()
@@ -91,7 +91,7 @@ export class SearchIndex
         let info = this.info;
         let store = this.store;
 
-        let lunr_options = this.lunr_options;
+        let lunr_custom_options = this.lunr_custom_options;
 
         const options = {}; // FIXME !
 
@@ -122,8 +122,8 @@ export class SearchIndex
             }
             builder.metadataWhitelist = [ 'position' ];
 
-            if (lunr_options.lunr_plugins) {
-                for (const plugin of lunr_options.lunr_plugins) {
+            if (lunr_custom_options.lunr_plugins) {
+                for (const plugin of lunr_custom_options.lunr_plugins) {
                     builder.use(plugin, options);
                 }
             }
@@ -138,7 +138,7 @@ export class SearchIndex
         debug(`... done.`);
     }
 
-    static load(search_index_data, lunr_options=null)
+    static load(search_index_data, lunr_custom_options=null)
     {
         const {info, serialized_store, serialized_index} = search_index_data;
 
@@ -147,14 +147,14 @@ export class SearchIndex
         if (serialized_index != null) {
             const idx = this._load_idx_notnull(info, serialized_index);
             let si = new SearchIndex(info, store, idx);
-            if (lunr_options != null) {
-                si.installLunrCustomization(lunr_options);
+            if (lunr_custom_options != null) {
+                si.installLunrCustomization(lunr_custom_options);
             }
             return si;
         } else {
             let si = new SearchIndex(info, store, null);
-            if (lunr_options != null) {
-                si.installLunrCustomization(lunr_options);
+            if (lunr_custom_options != null) {
+                si.installLunrCustomization(lunr_custom_options);
             }
             si.build();
             return si;
@@ -178,7 +178,7 @@ export class SearchIndex
         this.store = store;
         this.idx = idx;
 
-        this.lunr_options = {};
+        this.lunr_custom_options = {};
     }
 
 

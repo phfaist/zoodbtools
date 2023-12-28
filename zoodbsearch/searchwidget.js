@@ -95,7 +95,8 @@ export class SearchWidget
 
         this.resolve_href = options.resolve_href ?? default_resolve_href;
 
-        this.query_parser_class = search_index.lunr_options.lunr_query_parser_class ?? lunr.QueryParser;
+        this.query_parser_class =
+            search_index.lunr_custom_options.lunr_query_parser_class ?? lunr.QueryParser;
 
         this.dom_container = options.dom_container;
         if (typeof this.dom_container === 'string' && this.dom_container.startsWith('#')) {
@@ -171,7 +172,7 @@ export class SearchWidget
             .join(', ');
         let instructions_widget = document.createElement('div');
         instructions_widget.classList.add('search-instructions-tip');
-        instructions_widget.innerHTML = 
+        let helpHtml =
            `<p>Type query term(s) and hit RETURN to search. </p>
             <p>Advanced usage:</p>
             <p class="search-instructions-item">
@@ -191,6 +192,12 @@ export class SearchWidget
               <code>term^10</code> to &quot;boost&quot; the term, i.e., to make
               it contribute more to the final match score.
             </p>`;
+        if (this.query_parser_class.add_help_html_paras != null) {
+            for (const paraHtml of this.query_parser_class.add_help_html_paras) {
+                helpHtml += `<p class="search-instructions-item">${paraHtml}</p>`;
+            }
+        }
+        instructions_widget.innerHTML = helpHtml;
         this.dom_container.appendChild(instructions_widget);
 
         let moreTippyOptions = {};

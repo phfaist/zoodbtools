@@ -56,8 +56,8 @@ function typesetPageMathPromise()
 async function load()
 {
     window.searchIndexDocsData =
-        //await import('./eczsrchidx.json')
-        await import('./ecztestsrchidx.json')
+        await import('./eczsrchidx.json')
+        //await import('./ecztestsrchidx.json')
         ;
     await setupSearch();
 }
@@ -66,7 +66,8 @@ async function setupSearch()
 {
     const { SearchIndex } = await import('@phfaist/zoodbtools_search/searchindex.js');
     const { SearchWidget } = await import('@phfaist/zoodbtools_search/searchwidget.js');
-    const { getLunrOptionsAdvancedSetup } = await import('@phfaist/zoodbtools_search/lunradvancedsetup.js');
+    const { getLunrCustomOptionsAdvancedSetup } =
+        await import('@phfaist/zoodbtools_search/lunradvancedsetup.js');
 
     console.log({searchIndexDocsData: window.searchIndexDocsData});
 
@@ -78,10 +79,10 @@ async function setupSearch()
         includeNGramsUpTo: 3,
     };
 
-    const indexLunrOptions = getLunrOptionsAdvancedSetup(lunrAdvancedOptions);
-    console.log(`About to load search index.`, { indexLunrOptions });
+    const indexLunrCustomOptions = getLunrCustomOptionsAdvancedSetup(lunrAdvancedOptions);
+    console.log(`About to load search index.`, { indexLunrCustomOptions });
 
-    const srchIndex = SearchIndex.load(srchData, indexLunrOptions);
+    const srchIndex = SearchIndex.load(srchData, indexLunrCustomOptions);
 
     const resolveHref = (object_type, object_id, object_doc) => {
         return `javascript:alert('Clicked ${object_type}:${object_id}');`;
