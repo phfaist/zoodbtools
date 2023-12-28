@@ -154,10 +154,12 @@ export function getLunrCustomOptionsAdvancedSetup(options)
     const {
         useRegexpTokenParser,
         tokenSpecList,
-        autoFuzzDistance,
-        autoFuzzMinTermLength,
-        includeNGramsUpTo,
+        //autoFuzzDistance,
+        //autoFuzzMinTermLength,
+        //includeNGramsUpTo,
     } = options;
+
+    debug(`Using lunr advanced setup options`, options);
 
     // compute the rxAnyToken
     let rxAnyToken = null;

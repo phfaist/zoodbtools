@@ -84,7 +84,7 @@ export class SearchIndex
     {
         this.lunr_custom_options.lunr_plugins = lunr_plugins;
         this.lunr_custom_options.lunr_query_parser_class = lunr_query_parser_class;
-        debug(`Set lunr customization -> `, this.lunr_custom_options);
+        //debug(`Set lunr customization -> `, this.lunr_custom_options);
     }
 
     build()
