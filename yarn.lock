@@ -1430,6 +1430,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@phfaist/zoodbtools_search@workspace:zoodbsearch"
   dependencies:
+    lodash: ^4.17.21
     lunr: ^2.3.9
     tippy.js: ^6.3.7
   peerDependencies:

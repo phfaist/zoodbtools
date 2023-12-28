@@ -5,10 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style type="text/css">
-html, body { width: 100%; height: 100%; margin: 0px; padding: 0px; background-color: rgb(220,220,255); }
+@import '~/../node_modules/tippy.js/dist/tippy.css';
+@import '~/../node_modules/tippy.js/themes/light.css';
+html, body {
+    width: 100%;
+    /* height: 100%; */
+    margin: 0px; padding: 0px; background-color: rgb(220,220,255);
+}
 body { padding: 20px; box-sizing: border-box; background-color: white; }
-
+.search-result {
+    margin: 1em;
+    border: solid .4pt blueviolet;
+    padding: 1em;
+    border-radius: 1em;
+}
     </style>
+    
 <script type="text/javascript">
 MathJax = {
     tex: {
@@ -41,34 +53,53 @@ function typesetPageMathPromise()
 </script>
 
 <script type="module">
+async function load()
+{
+    window.searchIndexDocsData =
+        //await import('./eczsrchidx.json')
+        await import('./ecztestsrchidx.json')
+        ;
+    await setupSearch();
+}
+
 async function setupSearch()
 {
     const { SearchIndex } = await import('@phfaist/zoodbtools_search/searchindex.js');
     const { SearchWidget } = await import('@phfaist/zoodbtools_search/searchwidget.js');
-    const searchIndexDocsJsonSource = await import('bundle-text:./ecztestsrchidx.json');
+    const { getLunrOptionsAdvancedSetup } = await import('@phfaist/zoodbtools_search/lunradvancedsetup.js');
 
-    console.log({searchIndexDocsJsonSource});
+    console.log({searchIndexDocsData: window.searchIndexDocsData});
 
     const domContainer = window.document.getElementById('SearchWidget');
 
-    const srchData = JSON.parse(searchIndexDocsJsonSource);
+    const srchData = window.searchIndexDocsData;
 
-    const srchIndex = SearchIndex.load(search_index_data);
+    const lunrOptions = getLunrOptionsAdvancedSetup();
+    console.log(`About to load search index.`, { lunrOptions });
 
-    const resolve_href = (object_type, object_id, object_doc) => {
+    const srchIndex = SearchIndex.load(srchData, lunrOptions);
+
+    const resolveHref = (object_type, object_id, object_doc) => {
         return `javascript:alert('Clicked ${object_type}:${object_id}');`;
     };
 
-    window.search_widget = new SearchWidget(search_index, {
-        dom_container,
-        initial_search_query,
-        resolve_href,
+    window.search_widget = new SearchWidget(srchIndex, {
+        dom_container: domContainer,
+        resolve_href: resolveHref,
         context_length: 200,
         getMathJax: () => window.MathJax,
         tippyAppearanceTheme: 'light',
     });
 }
-window.addEventListener('load', setupSearch);
+window.addEventListener('load', load);
+window.setupSearch = setupSearch;
+
+window.boostCodeById = async (codeId, boost) => {
+    const j = window.searchIndexDocsData.serialized_store.id.indexOf('multimodegkp');
+    console.log({codeId, j});
+    window.searchIndexDocsData.serialized_store._z_searchboost[j] = boost;
+    await setupSearch();
+};
 </script>
 
   </head>

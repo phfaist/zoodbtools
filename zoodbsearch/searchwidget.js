@@ -93,21 +93,25 @@ export class SearchWidget
     {
         this.search_index = search_index;
 
-        this.resolve_href = options.resolve_href ?? default_resolve_href
+        this.resolve_href = options.resolve_href ?? default_resolve_href;
+
+        this.query_parser_class = search_index.lunr_options.lunr_query_parser_class ?? lunr.QueryParser;
 
         this.dom_container = options.dom_container;
-        if (typeof this.dom_container === 'string' && this.dom_container.startswith('#')) {
+        if (typeof this.dom_container === 'string' && this.dom_container.startsWith('#')) {
             this.dom_container = window.document.getElementById(this.dom_container.slice(1));
         }
 
         this.initial_search_query = options.initial_search_query;
 
-        this.auto_fuzz_min_word_length = options.auto_fuzz_min_word_length ?? 4;
-        this.auto_fuzz_distance = options.auto_fuzz_distance ?? 1;
-        debug("Auto fuzz distance is = ",
-              this.auto_fuzz_distance,
-              " to be applied to words of length at least = ",
-              this.auto_fuzz_min_word_length);
+        // WARNING, auto_fuzz_min_word_length, auto_fuzz_distance are no longer handled here.
+        if (options.auto_fuzz_distance || options.auto_fuzz_min_word_length) {
+            console.warn(
+                `Options auto_fuzz_distance and auto_fuzz_min_word_length are no longer `
+                + `handled in the SearchWidget constructor.  Please used advanced lunr setup `
+                + `of the SearchIndex instance instead.`
+            );
+        }
 
         this.context_length = options.context_length ?? default_context_length;
 
@@ -124,7 +128,7 @@ export class SearchWidget
         // Install on web page
         //
 
-        console.log("Installing the search widget in the page.");
+        debug("Installing the search widget in the page.");
 
         // clear any existing content in the target app container
         this.dom_container.innerHTML = '';
@@ -230,32 +234,17 @@ export class SearchWidget
             return;
         }
 
-        console.log("Searching! search_str =", search_str);
+        debug("Searching! search_str =", search_str);
 
-        let _auto_fuzz_min_word_length = this.auto_fuzz_min_word_length;
-        let _auto_fuzz_distance = this.auto_fuzz_distance;
+        let query_parser_class = this.query_parser_class;
 
         let results;
         try {
 
             let q = function (query) {
-                let parser = new lunr.QueryParser(search_str, query);
+                let parser = new query_parser_class(search_str, query);
                 let qq = parser.parse();
-                console.log("Query = ", qq);
-                // tweak the query to add an edit distance to all terms
-                for (let clause of qq.clauses) {
-                    console.log("Processing clause: ", clause,
-                                " auto_fuzz_min_word_length = ", _auto_fuzz_min_word_length,
-                                " auto_fuzz_distance = ", _auto_fuzz_distance);
-                    let term_length = clause.term.length;
-                    if (clause.term.charAt(0) == '*') { --term_length; }
-                    if (clause.term.charAt(clause.term.length - 1) == '*') { --term_length; }
-                    if (typeof clause.editDistance === 'undefined'
-                        && term_length >= _auto_fuzz_min_word_length) {
-                        clause.editDistance = _auto_fuzz_distance;
-                    }
-                }
-                console.log("Done processing clauses.");
+                debug("Query = ", qq);
                 return qq;
             };
 
@@ -270,7 +259,7 @@ export class SearchWidget
             }
         }
 
-        console.log('results =', results);
+        debug('results =', results);
 
         this._display_search_results(search_str, results);
     }

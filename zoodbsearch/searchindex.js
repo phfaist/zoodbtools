@@ -4,14 +4,6 @@ const debug = debug_module('zoodbtools_search.searchindex');
 import lunr from 'lunr';
 
 
-
-export function lunrPluginAdvancedSetup(builder)
-{
-
-}
-
-
-
 /**
  * An object holding an index for the zoo database, which can be used for
  * searching with the `Lunr` library.
@@ -36,7 +28,6 @@ export class SearchIndex
         );
 
         const info = {
-            advanced_setup: options.advanced_setup ?? true,
             object_types: searchable_text_fieldset.object_types,
             fields: searchable_text_fieldset.fields,
             field_name_id: searchable_text_fieldset.field_name_id,
@@ -68,8 +59,13 @@ export class SearchIndex
                 }
 
                 const doc = Object.assign(
+                    {
+                        _z_searchboost: null, // searchabletextdoc's can set per-object boost
+                    },
                     searchable_text_doc,
-                    { _z_stid: store.length } // lunr needs the current index here.
+                    {
+                        _z_stid: store.length, // lunr needs the current index here.
+                    }
                 );
 
                 store.push(doc);
@@ -81,10 +77,20 @@ export class SearchIndex
         return new SearchIndex(info, store, null);
     }
 
+    installLunrCustomization({ lunr_plugins, lunr_query_parser_class })
+    {
+        this.lunr_options.lunr_plugins = lunr_plugins;
+        this.lunr_options.lunr_query_parser_class = lunr_query_parser_class;
+    }
+
     build()
     {
         let info = this.info;
         let store = this.store;
+
+        let lunr_options = this.lunr_options;
+
+        const options = {}; // FIXME !
 
         //
         // build the index!
@@ -113,20 +119,23 @@ export class SearchIndex
             }
             builder.metadataWhitelist = [ 'position' ];
 
-            if (info.advanced_setup) {
-                builder.use(lunrPluginAdvancedSetup);
+            if (lunr_options.lunr_plugins) {
+                for (const plugin of lunr_options.lunr_plugins) {
+                    builder.use(plugin, options);
+                }
             }
             
             for (const doc of store) {
-                //debug(`Adding doc =`, doc);
-                builder.add(doc);
+                const doc_boost = doc._z_searchboost ?? 1;
+                if (doc_boost != 1) { debug(`Adding doc =`, doc, ` with boost = `, doc_boost); }
+                builder.add(doc, { boost: doc_boost });
             }
 
         } );
         debug(`... done.`);
     }
 
-    static load(search_index_data)
+    static load(search_index_data, lunr_options=null)
     {
         const {info, serialized_store, serialized_index} = search_index_data;
 
@@ -134,9 +143,16 @@ export class SearchIndex
 
         if (serialized_index != null) {
             const idx = this._load_idx_notnull(info, serialized_index);
-            return new SearchIndex(info, store, idx);
+            let si = new SearchIndex(info, store, idx);
+            if (lunr_options != null) {
+                si.installLunrCustomization(lunr_options);
+            }
+            return si;
         } else {
             let si = new SearchIndex(info, store, null);
+            if (lunr_options != null) {
+                si.installLunrCustomization(lunr_options);
+            }
             si.build();
             return si;
         }
@@ -158,6 +174,8 @@ export class SearchIndex
         this.info = info;
         this.store = store;
         this.idx = idx;
+
+        this.lunr_options = {};
     }
 
 
@@ -181,7 +199,7 @@ export class SearchIndex
     {
         // compress the store's representation to save data
         const store_size = this.store.length;
-        const storefields = [].concat(['_z_otype', '_z_href'], this.info.fields);
+        const storefields = [].concat(['_z_otype', '_z_searchboost', '_z_href'], this.info.fields);
         let serialized_store = Object.fromEntries(
             storefields
             .map( (fldname) => [fldname, new Array(store_size)] )
@@ -203,7 +221,7 @@ export class SearchIndex
     }
     static _load_store(info, serialized_store)
     {
-        const storefields = [].concat(['_z_otype', '_z_href'], info.fields);
+        const storefields = [].concat(['_z_otype', '_z_searchboost', '_z_href'], info.fields);
         const store_size = serialized_store._z_store_size;
         let store = new Array(store_size);
         for (let j = 0; j < store_size; ++j) {
