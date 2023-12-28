@@ -13,6 +13,11 @@
     "devDependencies": {
         "mocha": "^10.2.0"
     },
+    "exports": {
+        "./searchindex": "./searchindex.js",
+        "./lunradvancedsetup": "./lunradvancedsetup.js",
+        "./searchwidget": "./searchwidget.js"
+    },
     "scripts": {
         "test": "mocha"
     }

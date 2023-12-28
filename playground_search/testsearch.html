@@ -64,10 +64,10 @@ async function load()
 
 async function setupSearch()
 {
-    const { SearchIndex } = await import('@phfaist/zoodbtools_search/searchindex.js');
-    const { SearchWidget } = await import('@phfaist/zoodbtools_search/searchwidget.js');
+    const { SearchIndex } = await import('@phfaist/zoodbtools_search/searchindex');
+    const { SearchWidget } = await import('@phfaist/zoodbtools_search/searchwidget');
     const { getLunrCustomOptionsAdvancedSetup } =
-        await import('@phfaist/zoodbtools_search/lunradvancedsetup.js');
+        await import('@phfaist/zoodbtools_search/lunradvancedsetup');
 
     console.log({searchIndexDocsData: window.searchIndexDocsData});
 
