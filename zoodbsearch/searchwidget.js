@@ -107,7 +107,7 @@ export class SearchWidget
 
         // WARNING: Options auto_fuzz_min_word_length,auto_fuzz_distance are no longer handled here.
         // They are now directly handled by the custom QueryParser class defined in lunradvancedsetup.js
-        // and which is set up in the SearchIndex class via (SearchIndex).installLunrCustomization().
+        // and which is set up in the SearchIndex class via (SearchIndex).install_lunr_customization().
         // This widget picks up `SearchIndex.query_parser_class` and directly uses that QueryParser class
         // to build the search query to the index.  That custom QueryParser class now takes care of
         // introducing any automatic fuzziness etc.

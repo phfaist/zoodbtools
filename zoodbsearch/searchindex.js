@@ -80,8 +80,14 @@ export class SearchIndex
         return new SearchIndex(info, store, null);
     }
 
-    installLunrCustomization({ lunr_plugins, lunr_query_parser_class })
+    install_lunr_customization({ lunr_plugins, lunr_query_parser_class })
     {
+        if (this.idx != null) {
+            console.warn(
+                `install_lunr_customization() appears to be called after index is built! `
+                + `Your search results might be inconsistent.`
+            );
+        }
         this.lunr_custom_options.lunr_plugins = lunr_plugins;
         this.lunr_custom_options.lunr_query_parser_class = lunr_query_parser_class;
         //debug(`Set lunr customization -> `, this.lunr_custom_options);
@@ -94,7 +100,7 @@ export class SearchIndex
 
         let lunr_custom_options = this.lunr_custom_options;
 
-        const options = {}; // FIXME !
+        const pluginOptions = {}; // FIXME !
 
         //
         // build the index!
@@ -125,7 +131,7 @@ export class SearchIndex
 
             if (lunr_custom_options.lunr_plugins) {
                 for (const plugin of lunr_custom_options.lunr_plugins) {
-                    builder.use(plugin, options);
+                    builder.use(plugin, pluginOptions);
                 }
             }
             
@@ -149,13 +155,13 @@ export class SearchIndex
             const idx = this._load_idx_notnull(info, serialized_index);
             let si = new SearchIndex(info, store, idx);
             if (lunr_custom_options != null) {
-                si.installLunrCustomization(lunr_custom_options);
+                si.install_lunr_customization(lunr_custom_options);
             }
             return si;
         } else {
             let si = new SearchIndex(info, store, null);
             if (lunr_custom_options != null) {
-                si.installLunrCustomization(lunr_custom_options);
+                si.install_lunr_customization(lunr_custom_options);
             }
             si.build();
             return si;
