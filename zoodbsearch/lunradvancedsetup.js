@@ -101,7 +101,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
 
     const fullTokenizer = function (obj, metadata) {
 
-        let tokens = singleTokenizer(obj, metadata) ;
+        let tokens = singleTokenizer(obj, metadata);
 
         if (includeNGramsUpTo > 1) {
             // copy tokens array so we can build n-grams and add them to the `tokens`
@@ -124,7 +124,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
                             }
                         )
                     );
-                    //debug(`Adding n-gram token `, { n, nGramToken });
+                    debug(`Adding n-gram token `, { n, nGramToken });
                     tokens.push( nGramToken );
                 }
             }
