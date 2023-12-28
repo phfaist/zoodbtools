@@ -74,10 +74,14 @@ async function setupSearch()
 
     const srchData = window.searchIndexDocsData;
 
-    const lunrOptions = getLunrOptionsAdvancedSetup();
-    console.log(`About to load search index.`, { lunrOptions });
+    const lunrAdvancedOptions = {
+        includeNGramsUpTo: 3,
+    };
 
-    const srchIndex = SearchIndex.load(srchData, lunrOptions);
+    const indexLunrOptions = getLunrOptionsAdvancedSetup(lunrAdvancedOptions);
+    console.log(`About to load search index.`, { indexLunrOptions });
+
+    const srchIndex = SearchIndex.load(srchData, indexLunrOptions);
 
     const resolveHref = (object_type, object_id, object_doc) => {
         return `javascript:alert('Clicked ${object_type}:${object_id}');`;

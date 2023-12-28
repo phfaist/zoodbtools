@@ -2,19 +2,19 @@ import debug_module from 'debug';
 const debug = debug_module('zoodbtools_search.searchwidget');
 
 import lunr from 'lunr';
-
 import tippy from 'tippy.js';
 
 // REQUIRE CUSTOM STYLING !!
 // import 'tippy.js/dist/tippy.css'; // for styling
 // import 'tippy.js/themes/light.css';
 
+import { canonicalPositionPairs } from './_searchutil.js';
+
 import './searchwidget.scss';
 
 const default_context_length = 50; // chars
 
 const max_num_results_for_mathjax = 100;
-
 
 
 // const _html_escapes = {
@@ -104,7 +104,12 @@ export class SearchWidget
 
         this.initial_search_query = options.initial_search_query;
 
-        // WARNING, auto_fuzz_min_word_length, auto_fuzz_distance are no longer handled here.
+        // WARNING: Options auto_fuzz_min_word_length,auto_fuzz_distance are no longer handled here.
+        // They are now directly handled by the custom QueryParser class defined in lunradvancedsetup.js
+        // and which is set up in the SearchIndex class via (SearchIndex).installLunrCustomization().
+        // This widget picks up `SearchIndex.query_parser_class` and directly uses that QueryParser class
+        // to build the search query to the index.  That custom QueryParser class now takes care of
+        // introducing any automatic fuzziness etc.
         if (options.auto_fuzz_distance || options.auto_fuzz_min_word_length) {
             console.warn(
                 `Options auto_fuzz_distance and auto_fuzz_min_word_length are no longer `
@@ -377,7 +382,7 @@ export class SearchWidget
                 continue;
             }
 
-            const poslist = hipos[fieldname];
+            let poslist = hipos[fieldname];
 
             // sort highlight positions by starting position
             poslist.sort( (a, b) => a[0] - b[0] );
@@ -398,6 +403,10 @@ export class SearchWidget
 
             let showhtml = '';
             let lastpos = 0;
+
+            // make sure that poslist is canonicalized -- overlapping pairs and duplicate pairs are
+            // merged into a single pair, etc.
+            poslist = canonicalPositionPairs(poslist);
 
             for (const pospair of poslist) {
                 if ( (lastpos>0 && ((pospair[0] - lastpos) < 2*context_length))
@@ -449,3 +458,4 @@ export class SearchWidget
     }
 
 }
+

@@ -9,5 +9,11 @@
     },
     "peerDependencies": {
         "@phfaist/zoodb": "*"
+    },
+    "devDependencies": {
+        "mocha": "^10.2.0"
+    },
+    "scripts": {
+        "test": "mocha"
     }
 }

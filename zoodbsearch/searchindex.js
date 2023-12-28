@@ -23,7 +23,10 @@ export class SearchIndex
 
         let fields_options = options.fields_options ?? {};
         fields_options.boost = Object.assign(
-            { [searchable_text_fieldset.field_name_title]: 40, },
+            {
+                [searchable_text_fieldset.field_name_id]: 40, // boost matching the object ID
+                [searchable_text_fieldset.field_name_title]: 40,
+            },
             fields_options.boost ?? {}
         );
 

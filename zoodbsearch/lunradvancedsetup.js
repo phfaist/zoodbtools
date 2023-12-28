@@ -14,16 +14,22 @@ export const defaultTokenSpecList = [
     {
         key: "apparentNumericalIdentifier",
         // numerical identifiers start with two digits.  The following allowed character class is the one
-        // that defines \S along with adding ")", "}", and "]" as identifier terminators
+        // that defines \S along with adding ";", ",", ")", "}", and "]" as identifier terminators
         // (cf. MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Character_Classes)
-        rx: /(\b\d{2,}[^\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff\]\)\}])/u
+        rx: /(\b\d{2,}[^\f\n\r\t\v\u0020\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff\])};,])/u
     },
     {
         key: "word",
         rx: /(\p{Alphabetic}+)/u,
     },
+    {
+        key: "stdFieldIdentifier",
+        rx: /[A-Za-z_][A-Za-z0-9_]*/u,
+    },
 ];
-
+export const defaultTokenSpecDict = Object.fromEntries(
+    defaultTokenSpecList.map( ({key, rx}) => [key, rx] )
+);
 
 export function getRxAnyToken(tokenSpecList)
 {
@@ -35,16 +41,15 @@ export function getRxAnyToken(tokenSpecList)
     );
 }
 
-export function getRegexpTokenLunrTokenizer(options)
+export function getRegexpTokenLunrTokenizer(options, { rxAnyToken })
 {
-    const rxAnyToken = options.rxAnyToken;
-    //debug(`RX IS: `, rxAnyToken);
+    const includeNGramsUpTo = options.includeNGramsUpTo ?? 1;
 
     const unicodeNormalizeString =
         options.unicodeNormalizeString ?? ((x) => x.normalize('NFKD'));
 
     return function (obj, metadata) {
-        //debug(`Custom tokenizer called.`, { obj, metadata });
+        //debug(`Custom tokenizer called.`, { obj, metadata, options });
         if (obj == null) {
             return [];
         }
@@ -81,25 +86,65 @@ export function getRegexpTokenLunrTokenizer(options)
             tokens.push( new lunr.Token(tokStr, tokMetaData) );
         }
 
+        if (includeNGramsUpTo > 1) {
+            // copy tokens array so we can build n-grams and add them to the `tokens`
+            // array on the fly.
+            let single_tokens = [... tokens];
+            for (let n = 2; n <= includeNGramsUpTo; ++n) {
+                for (let k = 0; k + n <= single_tokens.length; ++k) {
+                    const ngram_toks = single_tokens.slice(k, k+n);
+                    const ngram_start = ngram_toks[0].metadata.position[0];
+                    const mm = ngram_toks[n-1].metadata;
+                    const ngram_end = mm.position[0] + mm.position[1]; // pos+len of last token in n-gram
+                    const nGramToken = new lunr.Token(
+                        ngram_toks.map( (t) => t.str ).join(' '),
+                        loMerge(
+                            {},
+                            metadata,
+                            {
+                                position: [ ngram_start, ngram_end ],
+                                index: tokens.length,
+                            }
+                        )
+                    );
+                    //debug(`Adding n-gram token `, { n, nGramToken });
+                    tokens.push( nGramToken );
+                }
+            }
+        }
+
         return tokens;
     };
 }
 
 
-export function lunrAdvancedSetupRegexpTokenizerPlugin(builder, options)
+export function lunrAdvancedSetupRegexpTokenizerPlugin(builder, options, { rxAnyToken })
 {
-    const { rxAnyToken } = options;
     debug(`Running custom lunr setup plugin, setting tokenizer.`, { rxAnyToken });
-    builder.tokenizer = getRegexpTokenLunrTokenizer({ rxAnyToken });
+    builder.tokenizer = getRegexpTokenLunrTokenizer(options, { rxAnyToken });
 }
 
-export function getLunrOptionsAdvancedSetup(options={})
+export function getLunrOptionsAdvancedSetup(options)
 {
-    const useRegxpTokenParser = options.useRegxpTokenParser ?? true;
-    const tokenSpecList = options.tokenSpecList ?? defaultTokenSpecList;
+    options = loMerge(
+        {
+            useRegxpTokenParser: true,
+            tokenSpecList: defaultTokenSpecList,
+            autoFuzzDistance: 1,
+            autoFuzzMinTermLength: 4,
+            includeNGramsUpTo: 1,
+            nGramBoostPerN: 5,
+        },
+        options || {}
+    );
 
-    const autoFuzzMinTermLength = options.autoFuzzMinTermLength ?? 4;
-    const autoFuzzDistance = options.autoFuzzDistance ?? 1; 
+    const {
+        useRegxpTokenParser,
+        tokenSpecList,
+        autoFuzzDistance,
+        autoFuzzMinTermLength,
+        includeNGramsUpTo,
+    } = options;
 
     // compute the rxAnyToken
     const rxAnyToken = useRegxpTokenParser ? getRxAnyToken(tokenSpecList) : null;
@@ -109,42 +154,18 @@ export function getLunrOptionsAdvancedSetup(options={})
     let lunr_plugins = [];
 
     if (useRegxpTokenParser) {
-        lunr_plugins.push( (builder, options) => {
+        lunr_plugins.push( (builder) => {
             return lunrAdvancedSetupRegexpTokenizerPlugin(
-                builder, loMerge({}, options, { rxAnyToken })
+                builder, options, { rxAnyToken }
             );
         } );
     }
 
     // set up the QueryParser class instance
-    const _RegexpTokenLunrQueryParser = class _RegexpTokenLunrQueryParser extends lunr.QueryParser
-    {
+    const _RegexpTokenLunrQueryParser = class extends RegexpTokenLunrQueryParserWithOptions {
         constructor(str, query)
         {
-            super(str, query);
-            if (useRegxpTokenParser) {
-                this.lexer = new RegexpTokenLunrQueryLexer(str, { rxAnyToken });
-            }
-            debug(`Constructed custom RegexpTokenLunrQueryParser, lexer is =`, this.lexer);
-        }
-
-        parse()
-        {
-            let qq = super.parse();
-            // tweak the query to add an edit distance to all terms
-            for (let clause of qq.clauses) {
-                debug("Processing clause: ", clause,
-                            " autoFuzzMinTermLength = ", autoFuzzMinTermLength,
-                            " autoFuzzDistance = ", autoFuzzDistance);
-                let term_length = clause.term.length;
-                if (clause.term.charAt(0) == '*') { --term_length; }
-                if (clause.term.charAt(clause.term.length - 1) == '*') { --term_length; }
-                if (typeof clause.editDistance === 'undefined'
-                    && term_length >= autoFuzzMinTermLength) {
-                    clause.editDistance = autoFuzzDistance;
-                }
-            }
-            debug("Done processing clauses.");
+            super(str, query, options, { rxAnyToken });
         }
     };
 
@@ -154,11 +175,107 @@ export function getLunrOptionsAdvancedSetup(options={})
     };
 }
 
+// Custom QueryParser class (needs to be wrapped to pass constructor oprtions!)
+
+class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
+{
+    constructor(str, query, options, { rxAnyToken })
+    {
+        super(str, query);
+
+        this.options = options || {};
+
+        if (this.options.useRegxpTokenParser) {
+            this.lexer = new RegexpTokenLunrQueryLexer(str, { rxAnyToken });
+        }
+
+        this.rawParsedClauseList = [];
+
+        debug(`Constructed custom RegexpTokenLunrQueryParser, lexer is =`, this.lexer);
+    }
+
+    // override function that flushes a new clause into the clause list
+    nextClause()
+    {
+        // copied from subclass source
+        let completedClause = this.currentClause;
+        let rawParsedClause = loMerge({}, completedClause); // keep a clone copy
+
+        this.query.clause(completedClause);
+        this.currentClause = {};
+
+        // Also save the raw clause we parsed (with some useful flag(s)), so that we
+        // can build n-grams etc.
+        rawParsedClause._is_simple_clause = (
+            rawParsedClause.fields == null
+            && rawParsedClause.boost == null
+            && rawParsedClause.wildcard == null
+            && (!rawParsedClause.term.startsWith('*'))
+            && (!rawParsedClause.term.endsWith('*'))
+            && rawParsedClause.presence == null
+        );
+        debug(`Adding raw parsed clause: `, { rawParsedClause });
+        this.rawParsedClauseList.push(rawParsedClause);
+    }
+
+    parse()
+    {
+        const {
+            autoFuzzDistance, autoFuzzMinTermLength,
+            includeNGramsUpTo, nGramBoostPerN,
+        } = this.options;
+
+        let qq = super.parse();
+        
+        // tweak the query to add an edit distance to all terms
+        for (let clause of qq.clauses) {
+            debug("Processing clause: ", clause,
+                        " autoFuzzMinTermLength = ", autoFuzzMinTermLength,
+                        " autoFuzzDistance = ", autoFuzzDistance);
+            let term_length = clause.term.length;
+            if (clause.term.charAt(0) == '*') { --term_length; }
+            if (clause.term.charAt(clause.term.length - 1) == '*') { --term_length; }
+            if (typeof clause.editDistance === 'undefined'
+                && term_length >= autoFuzzMinTermLength) {
+                clause.editDistance = autoFuzzDistance;
+            }
+        }
+
+        // maybe include n-grams.
+        // FIXME: NEEDS TO BE DONE *BEFORE* STEMMING.
+        if (includeNGramsUpTo > 1) {
+            let add_clauses = [];
+            for (let n = 2; n <= includeNGramsUpTo; ++n) {
+                for (let k = 0; k + n <= this.rawParsedClauseList.length; ++k) {
+                    let cl_ngram = this.rawParsedClauseList.slice(k, k+n);
+                    let only_simple_terms = cl_ngram.every( (cl) => cl._is_simple_clause );
+                    debug(`n-gram clause? `, { n, k, cl_ngram, only_simple_terms });
+                    if (!only_simple_terms) {
+                        continue; // only apply n-grams to un-decorated sequences of terms.
+                    }
+                    add_clauses.push({
+                        term: cl_ngram.map( (cl) => cl.term ).join(' '),
+                        boost: n * nGramBoostPerN,
+                    });
+                }
+            }
+            for (const cl of add_clauses) {
+                qq.clause(cl);
+            }
+            debug(`Added clauses for n-grams: `, add_clauses);
+        }
+
+        debug("Done processing clauses.", { qq });
+
+        return qq;
+    }
+};
 
 
 
-
-// ==== CUSTOM LEXER ====
+// ============================================================================
+// ==== CUSTOM LEXER
+// ============================================================================
 
 export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
 {
@@ -172,6 +289,12 @@ export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
             '^(\\*?' + rxAnyToken.source + '\\*?)$',
             rxAnyToken.flags
         );
+        // These chars will always be acceptable to be parsed as part of a term.  Two reasons:
+        // 1) speed up the test of whether or not a char should be kept as part of the current
+        // term, and 2) automatically accept chars that can actually be part of a field name 
+        // (of the syntax "fieldname:...") before we had the chance to determine whether the char
+        // we are seeing is part of a field name specification or part of a search term.
+        this.rxSimpleFieldChar = /[A-Za-z0-9_]/;
     }
 
     run()
@@ -275,7 +398,7 @@ RegexpTokenLunrQueryLexer.lexText = function (lexer) {
             return RegexpTokenLunrQueryLexer.lexText
         }
 
-        if (/[a-zA-Z0-9._]/.test(char)) {
+        if (lexer.rxSimpleFieldChar.test(char)) {
             // always accept these chars, they could be field names.
             //debug(`automatically accepting char = `, char);
             continue;
@@ -292,4 +415,4 @@ RegexpTokenLunrQueryLexer.lexText = function (lexer) {
     }
 };
 
-// ==========================
+// ============================================================================
