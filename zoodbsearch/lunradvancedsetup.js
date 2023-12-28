@@ -48,7 +48,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
     const unicodeNormalizeString =
         options.unicodeNormalizeString ?? ((x) => x.normalize('NFKD'));
 
-    const singleTokenizer = function (obj, metadata) {
+    const singleTokenizer = function (obj, metadata, xtraOptions) {
 
         //debug(`Custom tokenizer called.`, { obj, metadata, options });
         if (obj == null) {
@@ -61,7 +61,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
                 ) );
         }
 
-        let rx = new RegExp(rxAnyToken, "ug");
+        let rx = new RegExp( xtraOptions?.rxAnyToken ?? rxAnyToken, "ug");
 
         // make string unicode-canonical
         let s = unicodeNormalizeString(obj.toString()).toLowerCase();
@@ -88,6 +88,15 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
         }
 
         return tokens;
+    };
+
+    const singleTokenizerWithWildcard = function (obj, metadata) {
+        return singleTokenizer(obj, metadata, {
+            rxAnyToken: new RegExp(
+                '\\*?(' + rxAnyToken.source + ')\\*?',
+                rxAnyToken.flags
+            )
+        });
     };
 
     const fullTokenizer = function (obj, metadata) {
@@ -124,7 +133,7 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
         return tokens;
     };
 
-    return { singleTokenizer, fullTokenizer };
+    return { singleTokenizer, singleTokenizerWithWildcard, fullTokenizer };
 }
 
 
@@ -346,7 +355,7 @@ export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
         if (type === lunr.QueryLexer.TERM) {
             // special treatment --- ensure the string is a sequence of valid tokens.
             // Use tokenizer for this.
-            let tokens = this.tokenizers.singleTokenizer(str, {});
+            let tokens = this.tokenizers.singleTokenizerWithWildcard(str, {});
             let terms = [];
             if (isDoubleQuoted) {
                 terms = [

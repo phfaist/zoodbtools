@@ -172,32 +172,33 @@ export class SearchWidget
             .join(', ');
         let instructions_widget = document.createElement('div');
         instructions_widget.classList.add('search-instructions-tip');
-        let helpHtml =
-           `<p>Type query term(s) and hit RETURN to search. </p>
-            <p>Advanced usage:</p>
-            <p class="search-instructions-item">
-                <code>+term</code> or <code>-term</code> to force the presence
-                or the abscence of a term;
-            </p>
-            <p class="search-instructions-item">
-              <code>field:term</code> to restrict the search term to within
-              the given <i>field</i>. Possible fields: ${display_fields_html}.
-            </p>
-            <p class="search-instructions-item">
-              <code>term~4</code> to include all terms
-              with edit distance 4 from the given term (use
-              <code>term~0</code> to cancel default fuzziness);
-            </p>
-            <p class="search-instructions-item">
-              <code>term^10</code> to &quot;boost&quot; the term, i.e., to make
-              it contribute more to the final match score.
-            </p>`;
+        let helpHtmlItemParas = [
+            `<code>+term</code> or <code>-term</code> to force the presence
+                or the abscence of a term`,
+            `<code>field:term</code> to restrict the search term to within
+                the given <i>field</i>. Possible fields: ${display_fields_html}`,
+            `<code>term~4</code> to include all terms
+                with edit distance 4 from the given term (use
+                <code>term~0</code> to cancel default fuzziness)`,
+            `<code>term^10</code> to &quot;boost&quot; the term, i.e., to make
+                it contribute more to the final match score`,
+            `<code>begi*</code> or <code>*nding</code> wildcards to match beginning or
+                ending of words`
+        ];
         if (this.query_parser_class.add_help_html_paras != null) {
-            for (const paraHtml of this.query_parser_class.add_help_html_paras) {
-                helpHtml += `<p class="search-instructions-item">${paraHtml}</p>`;
-            }
+            helpHtmlItemParas.push( ... this.query_parser_class.add_help_html_paras );
         }
+        let helpHtml =
+            `<p>Type query term(s) and hit RETURN to search. </p>
+            <p>Advanced usage:</p>`
+            + helpHtmlItemParas.map( (paraHtml, index) => (
+                `<p class="search-instructions-item">${paraHtml}${
+                    index === helpHtmlItemParas.length-1 ? '.' : ';'
+                }</p>`
+            ) ).join('');
         instructions_widget.innerHTML = helpHtml;
+        instructions_widget.style.overflow = 'auto';
+        instructions_widget.style.maxHeight = '80vh';
         this.dom_container.appendChild(instructions_widget);
 
         let moreTippyOptions = {};
