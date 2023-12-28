@@ -3,6 +3,7 @@ const debug = debug_module('zoodbtools_search._searchutil');
 
 export function canonicalPositionPairs(poslist)
 {
+    debug(`canonicalPositionPairs, poslist=`, poslist);
     // newposlist always contains disjoint intervals sorted in increasing order.
     let newposlist = [];
 
@@ -59,5 +60,6 @@ export function canonicalPositionPairs(poslist)
         }
         debug(`Now newposlist = `, newposlist);
     }
+    debug(`final newposlist=`, newposlist);
     return newposlist;
 }

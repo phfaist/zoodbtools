@@ -382,61 +382,52 @@ export class SearchWidget
                 continue;
             }
 
-            let poslist = hipos[fieldname];
-
-            // sort highlight positions by starting position
-            poslist.sort( (a, b) => a[0] - b[0] );
-            // make sure that end position does not overstep another starting position
-            poslist.forEach( (x, index) => {
-                if ( (index < poslist.length - 1)
-                     && x[0]+x[1] > poslist[index+1][0] ) {
-                    // oversteps onto next position; shorten
-                    return [ x[0], poslist[index+1][0]-x[0] ];
-                } else {
-                    return [ x[0], x[1] ]; // all ok
-                }
-            });
-
-            //console.log('fieldname =', fieldname, 'poslist =', poslist);
-
             const docfieldstr = doc[fieldname];
 
-            let showhtml = '';
-            let lastpos = 0;
+            let poslist = hipos[fieldname];
+
+            debug(`Raw highlight positions in ${fieldname} - `, poslist);
+            debug(`Raw string is\n`, docfieldstr);
+            for (const [pstart, plen] of poslist) {
+                debug(` ... str[${pstart}:+${plen}] ==> ‘${docfieldstr.substring(pstart, pstart+plen)}’`);
+            }
 
             // make sure that poslist is canonicalized -- overlapping pairs and duplicate pairs are
             // merged into a single pair, etc.
             poslist = canonicalPositionPairs(poslist);
 
+            let showhtml = '';
+            let lastpos = 0;
+
             for (const pospair of poslist) {
                 if ( (lastpos>0 && ((pospair[0] - lastpos) < 2*context_length))
                      || (lastpos==0 && (pospair[0] < context_length) ) ) {
                     // close to previous match (or string start), do not elide
-                    showhtml += escape_html(docfieldstr.substr(lastpos, pospair[0]-lastpos));
+                    showhtml += escape_html(docfieldstr.substring(lastpos, pospair[0]));
                 } else {
                     if (lastpos != 0) {
                         showhtml += escape_html(
-                            docfieldstr.substr(lastpos, context_length)
+                            docfieldstr.substring(lastpos, lastpos+context_length)
                         );
                         showhtml += '…';
                     }
                     showhtml += ' …';
                     showhtml += escape_html(
-                        docfieldstr.substr(pospair[0] - context_length, context_length)
+                        docfieldstr.substring(pospair[0] - context_length, pospair[0])
                     );
                 }
                 showhtml += '<span class="sr-highlight">'
-                    + escape_html( docfieldstr.substr(pospair[0], pospair[1]) )
+                    + escape_html( docfieldstr.substring(pospair[0], pospair[0]+pospair[1]) )
                     + '</span>';
                 lastpos = pospair[0] + pospair[1];
             }
             if (docfieldstr.length > (lastpos + context_length)) {
                 showhtml += escape_html(
-                    docfieldstr.substr(lastpos, context_length)
+                    docfieldstr.substring(lastpos, lastpos+context_length)
                 ) + '…';
             } else {
                 showhtml += escape_html(
-                    docfieldstr.substr(lastpos)
+                    docfieldstr.substring(lastpos)
                 );
             }
 

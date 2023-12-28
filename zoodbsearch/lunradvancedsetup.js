@@ -102,7 +102,7 @@ export function getRegexpTokenLunrTokenizer(options, { rxAnyToken })
                             {},
                             metadata,
                             {
-                                position: [ ngram_start, ngram_end ],
+                                position: [ ngram_start, ngram_end-ngram_start ],
                                 index: tokens.length,
                             }
                         )
