@@ -41,14 +41,15 @@ export function getRxAnyToken(tokenSpecList)
     );
 }
 
-export function getRegexpTokenLunrTokenizer(options, { rxAnyToken })
+export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
 {
     const includeNGramsUpTo = options.includeNGramsUpTo ?? 1;
 
     const unicodeNormalizeString =
         options.unicodeNormalizeString ?? ((x) => x.normalize('NFKD'));
 
-    return function (obj, metadata) {
+    const singleTokenizer = function (obj, metadata) {
+
         //debug(`Custom tokenizer called.`, { obj, metadata, options });
         if (obj == null) {
             return [];
@@ -86,6 +87,13 @@ export function getRegexpTokenLunrTokenizer(options, { rxAnyToken })
             tokens.push( new lunr.Token(tokStr, tokMetaData) );
         }
 
+        return tokens;
+    };
+
+    const fullTokenizer = function (obj, metadata) {
+
+        let tokens = singleTokenizer(obj, metadata) ;
+
         if (includeNGramsUpTo > 1) {
             // copy tokens array so we can build n-grams and add them to the `tokens`
             // array on the fly.
@@ -115,20 +123,16 @@ export function getRegexpTokenLunrTokenizer(options, { rxAnyToken })
 
         return tokens;
     };
+
+    return { singleTokenizer, fullTokenizer };
 }
 
-
-export function lunrAdvancedSetupRegexpTokenizerPlugin(builder, options, { rxAnyToken })
-{
-    debug(`Running custom lunr setup plugin, setting tokenizer.`, { rxAnyToken });
-    builder.tokenizer = getRegexpTokenLunrTokenizer(options, { rxAnyToken });
-}
 
 export function getLunrCustomOptionsAdvancedSetup(options)
 {
     options = loMerge(
         {
-            useRegxpTokenParser: true,
+            useRegexpTokenParser: true,
             tokenSpecList: defaultTokenSpecList,
             autoFuzzDistance: 1,
             autoFuzzMinTermLength: 4,
@@ -139,7 +143,7 @@ export function getLunrCustomOptionsAdvancedSetup(options)
     );
 
     const {
-        useRegxpTokenParser,
+        useRegexpTokenParser,
         tokenSpecList,
         autoFuzzDistance,
         autoFuzzMinTermLength,
@@ -147,29 +151,34 @@ export function getLunrCustomOptionsAdvancedSetup(options)
     } = options;
 
     // compute the rxAnyToken
-    const rxAnyToken = useRegxpTokenParser ? getRxAnyToken(tokenSpecList) : null;
+    let rxAnyToken = null;
+    let tokenizers = null;
+    if (useRegexpTokenParser) {
+        rxAnyToken = getRxAnyToken(tokenSpecList);
+        tokenizers = getRegexpTokenLunrTokenizers(options, { rxAnyToken });
+    }
 
     // TODO: support no-stemming terms ("Hamming" as in Hamming distance etc.)
 
     let lunr_plugins = [];
 
-    if (useRegxpTokenParser) {
+    if (useRegexpTokenParser) {
         lunr_plugins.push( (builder) => {
-            return lunrAdvancedSetupRegexpTokenizerPlugin(
-                builder, options, { rxAnyToken }
-            );
+            builder.tokenizer = tokenizers.fullTokenizer;
         } );
     }
+
+    let computed = { rxAnyToken, tokenizers };
 
     // set up the QueryParser class instance
     const _RegexpTokenLunrQueryParser = class extends RegexpTokenLunrQueryParserWithOptions {
         constructor(str, query)
         {
-            super(str, query, options, { rxAnyToken });
+            super(str, query, options, computed);
         }
     };
     _RegexpTokenLunrQueryParser.add_help_html_paras =
-        RegexpTokenLunrQueryParserWithOptions.getHtmlHelpParas(options, { rxAnyToken });
+        RegexpTokenLunrQueryParserWithOptions.getHtmlHelpParas(options, computed);
 
     return {
         lunr_plugins,
@@ -177,18 +186,21 @@ export function getLunrCustomOptionsAdvancedSetup(options)
     };
 }
 
-// Custom QueryParser class (needs to be wrapped to pass constructor oprtions!)
+
+// ============================================================================
+// ==== Custom Query Parser (needs to be wrapped to pass constructor oprtions!)
+// ============================================================================
 
 class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
 {
-    constructor(str, query, options, { rxAnyToken })
+    constructor(str, query, options, computed)
     {
         super(str, query);
 
         this.options = options || {};
 
-        if (this.options.useRegxpTokenParser) {
-            this.lexer = new RegexpTokenLunrQueryLexer(str, { rxAnyToken });
+        if (this.options.useRegexpTokenParser) {
+            this.lexer = new RegexpTokenLunrQueryLexer(str, computed);
         }
 
         this.rawParsedClauseList = [];
@@ -248,9 +260,7 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
         
         // tweak the query to add an edit distance to all terms
         for (let clause of qq.clauses) {
-            debug("Processing clause: ", clause,
-                        " autoFuzzMinTermLength = ", autoFuzzMinTermLength,
-                        " autoFuzzDistance = ", autoFuzzDistance);
+            debug("Processing clause: ", { clause, autoFuzzMinTermLength, autoFuzzDistance});
             let term_length = clause.term.length;
             if (clause.term.charAt(0) == '*') { --term_length; }
             if (clause.term.charAt(clause.term.length - 1) == '*') { --term_length; }
@@ -298,36 +308,78 @@ class RegexpTokenLunrQueryParserWithOptions extends lunr.QueryParser
 
 export class RegexpTokenLunrQueryLexer extends lunr.QueryLexer
 {
-    constructor(str, { rxAnyToken })
+    constructor(str, { rxAnyToken, tokenizers })
     {
         debug(`Constructing custom QueryLexer instance.`, {str, rxAnyToken});
         super(str);
-        // RegExp must assert the full string to be tested is a valid token,
-        // including possible '*' wildcards at the beginning & end of the token.
-        this.rxAnyTokenFull = new RegExp(
-            '^(\\*?' + rxAnyToken.source + '\\*?)$',
-            rxAnyToken.flags
-        );
-        // These chars will always be acceptable to be parsed as part of a term.  Two reasons:
-        // 1) speed up the test of whether or not a char should be kept as part of the current
-        // term, and 2) automatically accept chars that can actually be part of a field name 
-        // (of the syntax "fieldname:...") before we had the chance to determine whether the char
-        // we are seeing is part of a field name specification or part of a search term.
-        this.rxSimpleFieldChar = /[A-Za-z0-9_]/;
+
+        this.tokenizers = tokenizers;
+
+        // // RegExp must assert the full string to be tested is a valid token,
+        // // including possible '*' wildcards at the beginning & end of the token.
+        // this.rxAnyTokenFull = new RegExp(
+        //     '^(\\*?' + rxAnyToken.source + '\\*?)$',
+        //     rxAnyToken.flags
+        // );
+        // // These chars will always be acceptable to be parsed as part of a term.  Two reasons:
+        // // 1) speed up the test of whether or not a char should be kept as part of the current
+        // // term, and 2) automatically accept chars that can actually be part of a field name 
+        // // (of the syntax "fieldname:...") before we had the chance to determine whether the char
+        // // we are seeing is part of a field name specification or part of a search term.
+        // this.rxSimpleFieldChar = /[A-Za-z0-9_]/;
     }
 
-    sliceString()
+    emit(type)
     {
         let str = super.sliceString();
+
+        let isDoubleQuoted = false;
+        // first of all, remove any double quotes, if applicable.
         if (str.length > 0 && str[0] === '"') {
             str = str.slice(1);
+            isDoubleQuoted = true;
         }
         if (str.length > 0 && str[str.length-1] === '"') {
             str = str.slice(0, str.length-1);
         }
-        return str;
-    }
 
+        if (type === lunr.QueryLexer.TERM) {
+            // special treatment --- ensure the string is a sequence of valid tokens.
+            // Use tokenizer for this.
+            let tokens = this.tokenizers.singleTokenizer(str, {});
+            let terms = [];
+            if (isDoubleQuoted) {
+                terms = [
+                    [ tokens.map( (t) => t.str ).join(' '),
+                      this.start,
+                      this.pos ]
+                ];
+            } else {
+                terms = tokens.map( (t) =>
+                    [ t.str, t.metadata.position[0], t.metadata.position[0]+t.metadata.position[1] ]
+                );
+            }
+            debug(`Got terms`, { str, isDoubleQuoted, tokens, terms, });
+            for (const [term,start,end] of terms) {
+                this.lexemes.push({
+                    type: type,
+                    str: term,
+                    start: start,
+                    end: end,
+                });
+            } 
+        } else {
+            this.lexemes.push({
+                type: type,
+                str: str,
+                start: this.start,
+                end: this.pos
+            });
+        }
+      
+        this.start = this.pos;
+    }
+    
     run()
     {
         let state = RegexpTokenLunrQueryLexer.lexText;
@@ -447,18 +499,11 @@ RegexpTokenLunrQueryLexer.lexText = function (lexer) {
             return RegexpTokenLunrQueryLexer.lexText
         }
 
-        if (lexer.rxSimpleFieldChar.test(char)) {
-            // always accept these chars, they could be field names.
-            //debug(`automatically accepting char = `, char);
-            continue;
-        }
-    
-        let stest = lexer.strSoFar(0);
-        const testResult = lexer.rxAnyTokenFull.test(stest);
-        //debug(`Term so far -> `, { stest, testResult });
-        if ( ! testResult ) {
-            // adding the current character makes us fail the "rxAnyTokenFull" test
-            // --> Term stopped one character earlier.
+        if (/\s/.test(char)) {
+            // We can't test for valid tokens via advanced regexp here
+            // because we're parsing the token character by character.
+            // Instead, we split at spaces for now and then worry about
+            // valid tokens in sliceString() when we emit the term.
             return RegexpTokenLunrQueryLexer.lexTerm;
         }
     }

@@ -3,12 +3,12 @@ const debug = debug_module('zoodbtools_search._searchutil');
 
 export function canonicalPositionPairs(poslist)
 {
-    debug(`canonicalPositionPairs, poslist=`, poslist);
+    //debug(`canonicalPositionPairs, poslist=`, poslist);
     // newposlist always contains disjoint intervals sorted in increasing order.
     let newposlist = [];
 
     for (const p of poslist) {
-        debug(`Processing interval`, p);
+        //debug(`Processing interval`, p);
         if (newposlist.length == 0) {
             newposlist.push(p);
             continue;
@@ -33,7 +33,7 @@ export function canonicalPositionPairs(poslist)
                 mLastMerge = m;
             }
         }
-        debug(`Placed interval: `, { mPreFirstMerge, mLastMerge });
+        //debug(`Placed interval: `, { mPreFirstMerge, mLastMerge });
         if (mLastMerge == null) {
             // great news! the interval is disjoint from the others, it can safely
             // be inserted after mPreFirstMerge.
@@ -58,8 +58,8 @@ export function canonicalPositionPairs(poslist)
                 [ newStart, newEnd - newStart ]
             );
         }
-        debug(`Now newposlist = `, newposlist);
+        //debug(`Now newposlist = `, newposlist);
     }
-    debug(`final newposlist=`, newposlist);
+    //debug(`final newposlist=`, newposlist);
     return newposlist;
 }

@@ -393,11 +393,11 @@ export class SearchWidget
 
             let poslist = hipos[fieldname];
 
-            debug(`Raw highlight positions in ${fieldname} - `, poslist);
-            debug(`Raw string is\n`, docfieldstr);
-            for (const [pstart, plen] of poslist) {
-                debug(` ... str[${pstart}:+${plen}] ==> ‘${docfieldstr.substring(pstart, pstart+plen)}’`);
-            }
+            // debug(`Raw highlight positions in ${fieldname} - `, poslist);
+            // debug(`Raw string is\n`, docfieldstr);
+            // for (const [pstart, plen] of poslist) {
+            //     debug(` ... str[${pstart}:+${plen}] ==> ‘${docfieldstr.substring(pstart, pstart+plen)}’`);
+            // }
 
             // make sure that poslist is canonicalized -- overlapping pairs and duplicate pairs are
             // merged into a single pair, etc.
