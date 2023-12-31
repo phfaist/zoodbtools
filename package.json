@@ -17,6 +17,7 @@
     "assert": "^2.0.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^5.5.0",
+    "eslint": "^8.56.0",
     "events": "^3.1.0",
     "https-browserify": "^1.0.0",
     "path-browserify": "^1.0.0",
@@ -28,6 +29,9 @@
   },
   "@parcel/resolver-default": {
     "packageExports": true
+  },
+  "scripts": {
+    "lint": "eslint 'zoo*/**/*.js'"
   },
   "alias": {
     "node-fetch": {

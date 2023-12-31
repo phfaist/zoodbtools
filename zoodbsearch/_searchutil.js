@@ -1,5 +1,5 @@
-import debug_module from 'debug';
-const debug = debug_module('zoodbtools_search._searchutil');
+//import debug_module from 'debug';
+//const debug = debug_module('zoodbtools_search._searchutil');
 
 export function canonicalPositionPairs(poslist)
 {

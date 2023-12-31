@@ -249,19 +249,12 @@ export class SearchWidget
 
         debug("Searching! search_str =", search_str);
 
-        let query_parser_class = this.query_parser_class;
+        //let query_parser_class = this.query_parser_class;
 
         let results;
         try {
 
-            let q = function (query) {
-                let parser = new query_parser_class(search_str, query);
-                let qq = parser.parse();
-                debug("Query = ", qq);
-                return qq;
-            };
-
-            results = this.search_index.idx.query(q);
+            results = this.search_index.query(search_str);
 
         } catch (e) {
             if (e instanceof lunr.QueryParseError) {

@@ -77,10 +77,19 @@ export class SearchIndex
         }
         debug(`... done.`);
 
-        return new SearchIndex(info, store, null);
+        return new SearchIndex({info, store, idx: null});
     }
 
-    install_lunr_customization({ lunr_plugins, lunr_query_parser_class })
+    /**
+     * 
+     * WARNING: lunr customizations are not serialized along with the index.  It is important
+     * that the client-side SearchIndex instance is also loaded with the relevant lunr
+     * customization, typically by specifying the relevant argument to SearchIndex.load().
+     *
+     * WARNING: I might change the properties in the lunr customization object!
+     */
+    install_lunr_customization({ lunr_plugins,
+        lunr_query_parser_class, query_index_preprocessor })
     {
         if (this.idx != null) {
             console.warn(
@@ -90,6 +99,7 @@ export class SearchIndex
         }
         this.lunr_custom_options.lunr_plugins = lunr_plugins;
         this.lunr_custom_options.lunr_query_parser_class = lunr_query_parser_class;
+        this.lunr_custom_options.query_index_preprocessor = query_index_preprocessor;
         //debug(`Set lunr customization -> `, this.lunr_custom_options);
     }
 
@@ -100,11 +110,26 @@ export class SearchIndex
 
         let lunr_custom_options = this.lunr_custom_options;
 
-        const pluginOptions = {}; // FIXME !
+        const pluginOptions = {
+
+            zoodb_search_index: this,
+
+            add_index_metadata(property, value) {
+                this._index_metadata[property] = value;
+            },
+
+            add_builder_finalizer_callback(callback) {
+                this._builder_finalizer_callbacks.push(callback);
+            },
+
+            _index_metadata: {},
+            _builder_finalizer_callbacks: [],
+        };
 
         //
         // build the index!
         //
+        this.index_metadata = {};
         debug(`building the index ...`);
         this.idx = lunr( function () {
             //
@@ -141,25 +166,41 @@ export class SearchIndex
                 builder.add(doc, { boost: doc_boost });
             }
 
+            // finalize the builder with plugin-set callbacks
+            for (const finalize_callback of pluginOptions._builder_finalizer_callbacks) {
+                finalize_callback.call(builder, builder, pluginOptions);
+            }
+
         } );
+
+        Object.assign(this.index_metadata, pluginOptions._index_metadata);
+
         debug(`... done.`);
     }
 
     static load(search_index_data, lunr_custom_options=null)
     {
-        const {info, serialized_store, serialized_index} = search_index_data;
+        const {
+            info,
+            serialized_store,
+            serialized_index,
+            serialized_index_metadata
+        } = search_index_data;
 
         const store = this._load_store(info, serialized_store);
 
         if (serialized_index != null) {
             const idx = this._load_idx_notnull(info, serialized_index);
-            let si = new SearchIndex(info, store, idx);
+            let si = new SearchIndex({
+                info, store, idx,
+                index_metadata: serialized_index_metadata
+            });
             if (lunr_custom_options != null) {
                 si.install_lunr_customization(lunr_custom_options);
             }
             return si;
         } else {
-            let si = new SearchIndex(info, store, null);
+            let si = new SearchIndex({info, store, idx: null});
             if (lunr_custom_options != null) {
                 si.install_lunr_customization(lunr_custom_options);
             }
@@ -174,21 +215,84 @@ export class SearchIndex
             info: this.info,
             serialized_store: this._dump_store(),
             serialized_index: this._dump_idx(),
+            serialized_index_metadata: this.index_metadata,
         };
     }
 
+    //
+    // Run a query against this index
+    //
+    query(arg)
+    {
+        const query_parser_class =
+            this.lunr_custom_options?.lunr_query_parser_class ?? lunr.QueryParser;
+        const index_metadata = this.index_metadata;
+        const query_index_preprocessor = this.lunr_custom_options?.query_index_preprocessor;
+            
+        debug(`SearchIndex.query()!`, arg);
+
+        let queryFns = [];
+        if (typeof arg === 'string') {
+            // Argument `arg` is a search string. Parse it with our query parser.
+            queryFns.push( function (query) {
+                let parser = new query_parser_class(arg, query);
+                let qq = parser.parse(); // will update the query object
+                debug("Built query = ", qq);
+                //return qq;
+            } );
+        } else {
+            queryFns.push(arg);
+        }
+
+        let idx = this.idx;
+        if (query_index_preprocessor != null) {
+            queryFns.push( function (query) {
+                const res = query_index_preprocessor({
+                    idx,
+                    query,
+                    index_metadata,
+                });
+                if (res.idx != null) {
+                    idx = res.idx;
+                }
+                if (res.queryFn != null) {
+                    res.queryFn(query);
+                }
+            } );
+        }
+
+        // prepare query object *BEFORE* calling idx.query(), because we might want to 
+        // run the query on a proxy index object (or extended index) instead!!
+        let query = new lunr.Query(idx.fields);
+        for (const queryFn of queryFns) {
+            queryFn.call(query, query);
+        }
+
+        return idx.query((q) => {
+            q.clauses = query.clauses;
+            q.allFields = query.allFields;
+        });
+    }
+
+
+
+    // ==========================================
+
 
     // you shouldn't have to use this directly
-    constructor(info, store, idx)
+    constructor({info, store, idx, index_metadata})
     {
         this.info = info;
         this.store = store;
         this.idx = idx;
+        // index metadata is any serializable information that is computed
+        // when the index is built and which needs to be accessible when performing
+        // queries.
+        this.index_metadata = index_metadata;
 
         this.lunr_custom_options = {};
     }
-
-
+    
     //
     // internal methods to load/dump index and store.
     //
