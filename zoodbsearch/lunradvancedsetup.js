@@ -103,7 +103,34 @@ export function getRegexpTokenLunrTokenizers(options, { rxAnyToken })
 
         let tokens = singleTokenizer(obj, metadata);
 
+        // FIXME: THE RESULTING INDEX IS A HUGE MEMORY HOG!  Instead, we should probably
+        // only store just enough information to know what token follows a given token
+        // occurence, so that we can look up n-gram indices on-demand!
+
+
         if (includeNGramsUpTo > 1) {
+
+            /* ### YES THIS SIGNIFICANTLY REDUCES INDEX SIZE.  Now I need to figure out
+                   how to patch lunr.js to make use of this information ...
+
+            // try above idea, to see if it works at least in theory. !!!
+            for (let i = 0; i < tokens.length; ++i) {
+                let t = tokens[i];
+                let next_n_tokens = tokens.slice(i+1, i+includeNGramsUpTo);
+                tokens[i] = new lunr.Token(
+                    t.str,
+                    loMerge(
+                        {},
+                        metadata,
+                        {
+                            nextTokens: next_n_tokens.map( (t) => t.str ).join(' '),
+                        }
+                    )
+                );
+            }
+            return tokens; // DEBUG DEBUG DEBUG!
+            */
+
             // copy tokens array so we can build n-grams and add them to the `tokens`
             // array on the fly.
             let single_tokens = [... tokens];
@@ -156,7 +183,7 @@ export function getLunrCustomOptionsAdvancedSetup(options)
         tokenSpecList,
         //autoFuzzDistance,
         //autoFuzzMinTermLength,
-        //includeNGramsUpTo,
+        includeNGramsUpTo,
     } = options;
 
     debug(`Using lunr advanced setup options`, options);
@@ -176,6 +203,9 @@ export function getLunrCustomOptionsAdvancedSetup(options)
     if (useRegexpTokenParser) {
         lunr_plugins.push( (builder) => {
             builder.tokenizer = tokenizers.fullTokenizer;
+            if (includeNGramsUpTo > 1) {
+                builder.metadataWhitelist.push('nextTokens');
+            }
         } );
     }
 

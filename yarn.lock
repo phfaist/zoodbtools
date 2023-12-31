@@ -1307,7 +1307,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=843cb2&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=d69cb2&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1327,13 +1327,13 @@ __metadata:
     sax: ^1.2.4
     stream-parser: ^0.3.1
     url: ^0.11.0
-  checksum: 56eae744b754a4b80af5e0361152c38e2af53f3b907648f01818c8b4b196ee075e5a49ca7e272b114fabad3332dade4a961a5ea88fb7a7bc31a57575e3160a4e
+  checksum: 17f750432d3a9500de77d4bb86f11d7f9c32ca3f18495778f169dc5ec2c467da637423452074c1db9d7f2cf0af358536ec2f76a2af32566c67dada53c93282c1
   languageName: node
   linkType: hard
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_search%40workspace%3Aplayground_search":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=843cb2&locator=zoodbtools_playground_search%40workspace%3Aplayground_search"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=d69cb2&locator=zoodbtools_playground_search%40workspace%3Aplayground_search"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1353,7 +1353,7 @@ __metadata:
     sax: ^1.2.4
     stream-parser: ^0.3.1
     url: ^0.11.0
-  checksum: 56eae744b754a4b80af5e0361152c38e2af53f3b907648f01818c8b4b196ee075e5a49ca7e272b114fabad3332dade4a961a5ea88fb7a7bc31a57575e3160a4e
+  checksum: 17f750432d3a9500de77d4bb86f11d7f9c32ca3f18495778f169dc5ec2c467da637423452074c1db9d7f2cf0af358536ec2f76a2af32566c67dada53c93282c1
   languageName: node
   linkType: hard
 

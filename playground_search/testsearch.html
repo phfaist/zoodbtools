@@ -55,10 +55,81 @@ function typesetPageMathPromise()
 <script type="module">
 async function load()
 {
-    window.searchIndexDocsData =
+    const searchIndexDocsData =
         await import('./eczsrchidx.json')
         //await import('./ecztestsrchidx.json')
         ;
+
+    window.searchIndexDocsData = searchIndexDocsData;
+    
+    /* ### meh, doesn't work well ...
+    
+    // try to "fix" the search data by compressing similar fields to fewer field
+    // names (let's hope this reduces the index size!)
+    let new_serialized_store = {};
+    const fieldNameMapping = {
+        id: 'id',
+        name: 'name',
+        alternative_names: 'name',
+        description: 'description',
+        features_code_capacity_threshold: 'features',
+        features_decoders: 'features',
+        features_encoders: 'features',
+        features_fault_tolerance: 'features',
+        features_general_gates: 'features',
+        features_magic_scaling_exponent: 'features',
+        features_rate: 'features',
+        features_threshold: 'features',
+        features_transversal_gates: 'features',
+        introduced: 'description',
+        logical: 'description',
+        notes: 'notes',
+        physical: 'description',
+        protection: 'description',
+        realizations: 'notes',
+        relations_cousins_code_id: 'relations',
+        relations_cousins_detail: 'relations',
+        relations_parents_code_id: 'relations',
+        relations_parents_detail: 'relations',
+        short_name: 'name',
+    };
+    for (const [fieldName,fieldStore] of Object.entries(searchIndexDocsData.serialized_store)) {
+        if (fieldName.startsWith('_z_')) {
+            new_serialized_store[fieldName] = fieldStore; // pass on unchanged/unmerged
+            continue;
+        }
+        let newFieldName = fieldNameMapping[fieldName];
+        if (newFieldName == null) {
+            throw new Error(`Unknown field name! ${fieldName}`);
+        }
+        if (new_serialized_store[newFieldName] == null) {
+            new_serialized_store[newFieldName] = fieldStore.map( (s) => (s ?? '') ); // ensure string
+        } else {
+            new_serialized_store[newFieldName] = new_serialized_store[newFieldName].map(
+                (s, i) => (s + '\n\n' + (fieldStore[i] ?? ''))
+            );
+        }
+    }
+
+    const new_info = Object.assign(
+        {
+            fields: ['id', 'name', 'description', 'features', 'notes', 'relations'],
+        },
+        searchIndexDocsData.info,
+    );
+
+    console.log('New serialized store: ', new_serialized_store);
+    console.log('New info: ', new_info);
+
+    window.searchIndexDocsData = Object.assign(
+        {
+            info: new_info,
+            serialized_store: new_serialized_store,
+        },
+        searchIndexDocsData
+    );
+    */
+
     await setupSearch();
 }
 
