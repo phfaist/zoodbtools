@@ -152,7 +152,7 @@ export class SearchIndex
                     builder.field(fldname);
                 }
             }
-            builder.metadataWhitelist = [ 'position' ];
+            builder.metadataWhitelist.push('position');
 
             if (lunr_custom_options.lunr_plugins) {
                 for (const plugin of lunr_custom_options.lunr_plugins) {

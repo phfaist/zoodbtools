@@ -643,7 +643,7 @@ export function getLunrCustomOptionsAdvancedSetup(options)
                             usePipeline: false,
                         }
                     ));
-                    debug(`Raw clause after pipeline: `, clause);
+                    debug(`Raw clause term after pipeline: ${clause.term} -> ${newTerm}`);
                 }
             }
 
