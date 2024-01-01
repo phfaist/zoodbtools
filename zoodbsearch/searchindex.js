@@ -237,8 +237,7 @@ export class SearchIndex
             queryFns.push( function (query) {
                 let parser = new query_parser_class(arg, query);
                 let qq = parser.parse(); // will update the query object
-                debug("Built query = ", qq);
-                //return qq;
+                return qq;
             } );
         } else {
             queryFns.push(arg);

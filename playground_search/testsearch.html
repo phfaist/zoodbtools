@@ -56,8 +56,8 @@ function typesetPageMathPromise()
 async function load()
 {
     const searchIndexDocsData =
-        await import('./eczsrchidx.json')
-        //await import('./ecztestsrchidx.json')
+        //await import('./eczsrchidx.json')
+        await import('./ecztestsrchidx.json')
         ;
 
     window.searchIndexDocsData = searchIndexDocsData;
@@ -148,6 +148,9 @@ async function setupSearch()
 
     const lunrAdvancedOptions = {
         includeNGramsUpTo: 3,
+        customBoostTerms: {
+            code: 0,
+        },
     };
 
     const indexLunrCustomOptions = getLunrCustomOptionsAdvancedSetup(lunrAdvancedOptions);
