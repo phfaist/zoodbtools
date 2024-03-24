@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "type": "module",
     "dependencies": {
+        "debug": "^4.3.4",
         "lodash": "^4.17.21",
         "lunr": "^2.3.9",
         "tippy.js": "^6.3.7"

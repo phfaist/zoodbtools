@@ -1408,7 +1408,7 @@ __metadata:
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=d69cb2&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=c056aa&locator=zoodbtools_playground_preview%40workspace%3Aplayground_preview"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1428,13 +1428,13 @@ __metadata:
     sax: ^1.2.4
     stream-parser: ^0.3.1
     url: ^0.11.0
-  checksum: 17f750432d3a9500de77d4bb86f11d7f9c32ca3f18495778f169dc5ec2c467da637423452074c1db9d7f2cf0af358536ec2f76a2af32566c67dada53c93282c1
+  checksum: 13fddd36baed20da45e414733ce1a54594678b81fcbe70a7af114835ba6a8bbe4cc2cec87729b81f42a10d021bb353c02791687c77d2ddec2bb8382f3629b4a9
   languageName: node
   linkType: hard
 
 "@phfaist/zoodb@file:../../zoodb::locator=zoodbtools_playground_search%40workspace%3Aplayground_search":
   version: 0.1.1
-  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=d69cb2&locator=zoodbtools_playground_search%40workspace%3Aplayground_search"
+  resolution: "@phfaist/zoodb@file:../../zoodb#../../zoodb::hash=c056aa&locator=zoodbtools_playground_search%40workspace%3Aplayground_search"
   dependencies:
     "@apidevtools/json-schema-ref-parser": ^10.1.0
     base32-encode: ^2.0.0
@@ -1454,7 +1454,7 @@ __metadata:
     sax: ^1.2.4
     stream-parser: ^0.3.1
     url: ^0.11.0
-  checksum: 17f750432d3a9500de77d4bb86f11d7f9c32ca3f18495778f169dc5ec2c467da637423452074c1db9d7f2cf0af358536ec2f76a2af32566c67dada53c93282c1
+  checksum: 13fddd36baed20da45e414733ce1a54594678b81fcbe70a7af114835ba6a8bbe4cc2cec87729b81f42a10d021bb353c02791687c77d2ddec2bb8382f3629b4a9
   languageName: node
   linkType: hard
 
@@ -1532,6 +1532,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@phfaist/zoodbtools_search@workspace:zoodbsearch"
   dependencies:
+    debug: ^4.3.4
     lodash: ^4.17.21
     lunr: ^2.3.9
     mocha: ^10.2.0
