@@ -7,7 +7,7 @@
     "@phfaist/zoodb": "file:../../zoodb",
     "@phfaist/zoodbtools_search": ">=0.0.1",
     "debug": "^4.3.4",
-    "parcel": "^2.9.3"
+    "parcel": "^2.13.2"
   },
   "peerDependencies": {
     "@phfaist/zoodb": "*"

@@ -16,7 +16,7 @@
     "isomorphic-git": "beta",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
-    "parcel": "^2.9.3",
+    "parcel": "^2.13.2",
     "parcel-optimizer-nohtmlsuffix": "https://github.com/phfaist/parcel-optimizer-nohtmlsuffix",
     "pify": "^6.1.0",
     "sirv-cli": "^2.0.2"

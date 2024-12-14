@@ -12,8 +12,8 @@
     "playground_search"
   ],
   "devDependencies": {
-    "@parcel/transformer-inline-string": "2.9.3",
-    "@parcel/transformer-sass": "2.9.3",
+    "@parcel/transformer-inline-string": "2.13.2",
+    "@parcel/transformer-sass": "2.13.2",
     "assert": "^2.0.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^5.5.0",
